@@ -8,7 +8,7 @@ class ExecEmitter extends EventEmitter{
 		super();
 		this.error = false;
 		this.output = null;
-		this.errorText = null;
+		this.errortext = null;
 		this.language = null;
 		this.codefile = null;
 		this.testcasefile = null;
@@ -16,8 +16,6 @@ class ExecEmitter extends EventEmitter{
 }
 
 const langObj = require("./lang.js");
-console.log(langObj);
-debugger;
 
 const checkFile = (filepath)=>{
 	return fs.existsSync(filepath);
@@ -30,7 +28,7 @@ const checkLangugeValidity = (langKey)=>{
 const getEmitter = ()=>{
 	var emitter = new ExecEmitter();
 	emitter.setData = function(langKey,codeFile,testCaseFile){
-		if(!checkLangugeValidity(langkey)){
+		if(!checkLangugeValidity(langKey)){
 			emitter.emit("langKeyError",new Error("Invalid Language"));
 			return;
 		}
@@ -42,13 +40,13 @@ const getEmitter = ()=>{
 			emitter.emit("fileError",new Error("Test Case File Does Not Exist"));
 			return;
 		}
-		this.language = langObj[langkey];
+		this.language = langObj[langKey];
 		this.codefile = codeFile;
 		this.testcasefile = testCaseFile;
 		return;
 	}
 	emitter.execute = function(){
-		setImmediate(handler(emitter));
+		handler(emitter);
 	}
 	return emitter;
 }

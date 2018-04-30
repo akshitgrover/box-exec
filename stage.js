@@ -75,7 +75,7 @@ const four = (lang,codefile,testcasefile,command)=>{
 	}
 	return new Promise((resolve,reject)=>{
 		let testCaseStream = fs.createReadStream(testcasefile);
-		let childProcess = child.exec("docker container exec -i " + container_name + " " + command + filename,(error,stderr,stdout)=>{
+		let childProcess = child.exec("docker container exec -i " + container_name + " " + command + filename,(error,stdout,stderr)=>{
 			if(error){
 				testCaseStream.unpipe();
 				testCaseStream.destroy();
