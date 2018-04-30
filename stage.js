@@ -1,5 +1,5 @@
 const child = require("child_process");
-
+const fs = require("fs");
 
 //Stage One : Check State Of Container
 
@@ -62,8 +62,40 @@ const three = (lang,codefile)=>{
 	});
 }
 
+//Stage Four: Execute Source Code
+
+const four = (lang,codefile,testcasefile,command)=>{
+	const container_name = "box-exec-" + lang;
+	codefile = codefile.replace(/\\/g,"/");
+	codefile = codefile.split("/");
+	let filename = codefile[codefile.length - 1];
+	if(lang == "c" || lang == "c++"){
+		filename = filename.slice(0,filename.indexOf(".")) + ".out";
+	}
+	return new Promise((resolve,reject)=>{
+		let testCaseStream = fs.createReadStream(testcasefile);
+		let childProcess = child.exec("docker container exec -i " + container_name + " " + command + filename,(error,stderr,stdout)=>{
+			if(error){
+				testCaseStream.unpipe();
+				testCaseStream.destroy();
+				reject(error);
+			}
+			if(stderr){
+				testCaseStream.unpipe();
+				testCaseStream.destroy();
+				reject(stderr);
+			}
+			testCaseStream.unpipe();
+			testCaseStream.destroy();
+			resolve(stdout);
+		});
+		testCaseStream.pipe(childProcess.stdin);
+	});
+}
+
 module.exports = {
 	one,
 	two,
-	three
+	three,
+	four
 }
