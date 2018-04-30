@@ -70,7 +70,7 @@ const four = (lang,codefile,testcasefile,command)=>{
 	codefile = codefile.replace(/\\/g,"/");
 	codefile = codefile.split("/");
 	let filename = codefile[codefile.length - 1];
-	if(lang == "c" || lang == "c++"){
+	if(lang == "c" || lang == "cpp"){
 		filename = filename.slice(0,filename.indexOf(".")) + ".out";
 	}
 	return new Promise((resolve,reject)=>{
