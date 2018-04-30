@@ -1,6 +1,8 @@
 const EventEmitter = require("events");
 const fs = require("fs");
 
+const handler = require("./processhandler.js");
+
 class ExecEmitter extends EventEmitter{
 	constructor(){
 		super();
@@ -13,7 +15,9 @@ class ExecEmitter extends EventEmitter{
 	}
 }
 
-const langObj = {1:"python2",2:"python3",3:"c",4:"c++"};
+const langObj = require("./lang.js");
+console.log(langObj);
+debugger;
 
 const checkFile = (filepath)=>{
 	return fs.existsSync(filepath);
@@ -42,6 +46,9 @@ const getEmitter = ()=>{
 		this.codefile = codeFile;
 		this.testcasefile = testCaseFile;
 		return;
+	}
+	emitter.execute = function(){
+		setImmediate(handler(emitter));
 	}
 	return emitter;
 }
