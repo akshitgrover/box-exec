@@ -34,9 +34,9 @@ const two = (lang,codefile)=>{
 	return new Promise((resolve,reject)=>{
 		child.exec("docker cp " + codefile + " " + container_name + ":/",(error,stdout,stderr)=>{
 			if(error || stderr){
-				reject();
+				reject(error || stderr);
 			}
-			resolve();
+			resolve(stdout);
 		});
 	});
 }
