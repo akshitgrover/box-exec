@@ -15,7 +15,7 @@ const one = (image,lang)=>{
 					resolve();
 				});
 			}
-			else if(stdout != "running"){
+			else if(stdout != "running\n"){
 				child.exec("docker container start " + container_name,(errorf,stdoutf,stderrf)=>{
 					if(errorf || stderrf){
 						reject();
@@ -23,6 +23,7 @@ const one = (image,lang)=>{
 					resolve();
 				});
 			}
+			resolve();
 		});
 	});
 }
