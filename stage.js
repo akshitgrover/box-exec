@@ -23,7 +23,9 @@ const one = (image,lang)=>{
 					resolve();
 				});
 			}
-			resolve();
+			else{
+				resolve();
+			}
 		});
 	});
 }
