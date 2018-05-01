@@ -1,25 +1,35 @@
 {
   "name": "box-exec",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha ./tests/script.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/akshitgrover/box-exec.git"
   },
   "author": {
-    "name":"Akshit Grover",
-    "email":"akshit.grover2016@gmail.com"
+    "name": "Akshit Grover",
+    "email": "akshit.grover2016@gmail.com"
   },
+  "keywords": [
+    "docker",
+    "sandbox",
+    "container",
+    "execute",
+    "compile"
+  ],
   "license": {
-    "type":"Apache-2.0",
-    "url":"https://opensource.org/licenses/apache2.0.php"
+    "type": "Apache-2.0",
+    "url": "https://opensource.org/licenses/apache2.0.php"
   },
   "bugs": {
     "url": "https://github.com/akshitgrover/box-exec/issues"
   },
-  "homepage": "https://github.com/akshitgrover/box-exec#readme"
+  "homepage": "https://github.com/akshitgrover/box-exec#readme",
+  "devDependencies": {
+    "expect": "^22.4.3"
+  }
 }
