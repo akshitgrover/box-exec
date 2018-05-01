@@ -10,8 +10,14 @@
     "type": "git",
     "url": "git+https://github.com/akshitgrover/box-exec.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": {
+    "name":"Akshit Grover",
+    "email":"akshit.grover2016@gmail.com",
+  },
+  "license": {
+    "type":"Apache-2.0",
+    "url":"https://opensource.org/licenses/apache2.0.php"
+  },
   "bugs": {
     "url": "https://github.com/akshitgrover/box-exec/issues"
   },
