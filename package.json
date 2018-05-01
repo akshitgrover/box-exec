@@ -1,6 +1,6 @@
 {
   "name": "box-exec",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/akshitgrover/box-exec#readme",
   "devDependencies": {
-    "expect": "^22.4.3"
+    "expect": "^22.4.3",
+    "mocha": "^5.1.1"
   }
 }
