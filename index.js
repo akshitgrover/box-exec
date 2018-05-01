@@ -61,6 +61,7 @@ const getEmitter = ()=>{
 		this.language = langObj[langKey];
 		this.codefile = codeFile;
 		this.testcasefile = testCaseFile;
+		emitter.emit("success");
 		return;
 	}
 	emitter.execute = function(){
