@@ -34,7 +34,7 @@ it("Should Compile/Execute C++ Code",(done)=>{
 it("Should Compile/Execute python3 Code",(done)=>{
 	const boxExec = require("./../index.js")();
 	boxExec.on("output",()=>{
-		expect(boxExec.output).toBe("7\r\n9\r\n11\r\n16\r\n18\r\n25\r\n7\r\n9\r\n11\r\n16\r\n18\r\n25\r\n7\r\n9\r\n11\r\n16\r\n18\r\n25\r\n7\r\n9\r\n11\r\n16\r\n18\r\n25\r\n72");
+		expect(boxExec.output).toBe("7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n72");
 		done();
 	});
 	boxExec.on("error",()=>{
