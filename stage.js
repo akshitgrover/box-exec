@@ -55,6 +55,8 @@ const three = (lang,codefile)=>{
 	return new Promise((resolve,reject)=>{
 		child.exec("docker container exec " + container_name + " g++ -o " + raw_name + " " + filename,(error,stdout,stderr)=>{
 			if(error){
+				let idx = error.message.indexOf("\n");
+				error = error.message.slice(idx,error.length);
 				reject(error);
 			}
 			if(stderr){
