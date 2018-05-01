@@ -1,22 +1,31 @@
+sudo: required
+
 language: node_js
+
+services:
+  - docker
 
 node_js:
   - "8"
   - "7"
 
-before_install:
-  - sudo apt-get update
-  - sudo apt-get install docker
-
 install:
   - npm i mocha
   - npm i expect
 
-script: npm i box-exec
+script: 
+  - docker image pull akshitgrover/c-alpine
+  - docker container run -id --name box-exec-c akshitgrover/c-alpine
+  - docker container run -id --name box-exec-cpp akshitgrover/c-alpine
+  - docker image pull akshitgrover/python2-alpine
+  - docker container run -id  --name box-exec-python2 akshitgrover/python2-alpine
+  - docker image pull akshitgrover/python3-alpine
+  - docker container run -id --name box-exec-python3 akshitgrover/python3-alpine
+  - npm run test 
 
 deploy:
   provider: npm
   email: "akshit.grover2016@gmail.com"
   api_key: 
-    secure: "bXXeNhBqmMC+UYf0dz5UpF5pu8szXCbhHkK74sCeG1SGl5MWn1/bbpvxXVwnXqUhdMEZuDziKTvN1A2e7kwRRGRkWu0Zm2uyHwchtkU6sqNOlXiLI5dtTieDdB/QGwfiEnSV7Sygs1pORL1qDJ0/debJtKBbCQ3xEzS4GS6jusAVsqwFH4ItKclfT8Icf4HCzXDdt0AVLHs/5VK7Q+EYnfCjanPS3QjCvOjRpQ5JV5j6fTy8lBtAwkv80vQ6h26NVsNr/2tHIio+evEdapDuXPpBmpgfcm4hgHoa7kxO9uoCIe0cJaOxmk5Isimd/vXzu5yfmBAgn+6RYa9LMy0FfMpFhWjdv5PkHZaYFUl86965FK91AVj03Xg4CYFd+vf8IcP7tHukmVq0xxjp5u/x/1YBKJiY5c8HUP3Nf9tgjUUGYmlwnrHWO0q3D8/aEaF1JGRi5eIUM6aqceH3lUrEAroPLbyqr+D9AXJMGu6VklyFb+lxp5J0Gwrjy8jkJEdG9qUtX8nRNLjMFz0O/2m3eYXwD9H1so/U+gpnj7YUEW6xTgqFpqaHjfbwsUYmW+CFJOKYrLh7RUNeD3d4/IzIadxxXCXvgnvmrMaZKlaP1bLbrxGnl4ytOKkhMVKSzOwtx5QqLOsqiAVXncQbyIIlEJoqf//8mNEUW1hUJZggU7w="
+    secure: "RVJe5kvQoohLsLsXdHbaecU+FpAo9Et8SWWk0e7cQx7V5/m6cCi+XEINU3YQZScU59yRcyTyTCxOHymV3JUoi2Ncv+wXRrS362LNC2PebZMCT7EOikiFJPGEGRV8nbMkigVrLMujlYEG8c61kJ0Mw9e4Loy5FtDX3QfSs58Vw7EzxGYu3yt9dNmAivuhtCNGyyd/4d7HHIRy0f7skg8kueaRgYWB073+Dy8OS68o77ooujID9XUeOzYRwCDvxmx+8O1ktXv0TSOsu0y6D0uHyrzwYWemrNLVsMpcOZ+GqmAOvxlQoBsQHcm3XySP/iFRok7/Hb2RXyJDZeyJ99YvRpb31qCPWSpoNcA5scRC+3Pi1ExMf92wiK775Icpt7U3uvTKjrvKGXXLE83sI5I4cpIeLxTjKNR4L4kCN650EQl4LI9gCrZWv3niW5SoWBVTct+V0UV7m6Hfra2b2it+xgB/Yiy8BClFcWM5h6ZEXvf+TCLzb2/6/Se9KhGliNwmfBlxk8zNMBc8oYamquzl0Imx25Mw+WrcvGvDrgMKnsorZflCu1y7DxxVpHUOgmOuyTA9FE7cLFVXUs0hRYwne/QgUnDK+oBOQLPL/bmz4aSFbXMCflA7O9/okklT7fgOHXz5XJoE7ZdeB26iW///ZRevPOFNJjnEOj8elWHSK84="
 
