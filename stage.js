@@ -87,7 +87,7 @@ const three = (lang,codefile)=>{
 
 //Stage Four: Execute Source Code
 
-const four = (lang,codefile,testcasefile,command)=>{
+const four = (lang,codefile,testcasefiles,command)=>{
 	const container_name = "box-exec-" + lang;
 	codefile = codefile.replace(/\\/g,"/");
 	codefile = codefile.split("/");
@@ -96,23 +96,25 @@ const four = (lang,codefile,testcasefile,command)=>{
 		filename = filename.slice(0,filename.indexOf(".")) + ".out";
 	}
 	return new Promise((resolve,reject)=>{
-		let testCaseStream = fs.createReadStream(testcasefile);
-		let childProcess = child.exec("docker container exec -i " + container_name + " " + command + filename,(error,stdout,stderr)=>{
-			if(error){
+
+		testcasefiles.forEach((testcasefile)=>{
+
+			let testCaseStream = fs.createReadStream(testcasefile);
+			let childProcess = child.exec("docker container exec -i " + container_name + " " + command + filename,(error,stdout,stderr)=>{
 				testCaseStream.unpipe();
 				testCaseStream.destroy();
-				reject(error);
-			}
-			if(stderr){
-				testCaseStream.unpipe();
-				testCaseStream.destroy();
-				reject(stderr);
-			}
-			testCaseStream.unpipe();
-			testCaseStream.destroy();
-			resolve(stdout);
+				if(error || stderr){
+					reject(error || stderr);
+				}
+				if(stderr){
+					reject(stderr);
+				}
+				resolve(stdout);
+			});
+			testCaseStream.pipe(childProcess.stdin);
+		
 		});
-		testCaseStream.pipe(childProcess.stdin);
+		
 	});
 }
 

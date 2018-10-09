@@ -29,7 +29,7 @@ class ExecEmitter extends EventEmitter{
 		this.errortext = null;
 		this.language = null;
 		this.codefile = null;
-		this.testcasefile = null;
+		this.testcasefiles = null;
 	}
 }
 
@@ -45,7 +45,7 @@ const checkLangugeValidity = (langKey)=>{
 
 const getEmitter = ()=>{
 	var emitter = new ExecEmitter();
-	emitter.setData = function(langKey,codeFile,testCaseFile){
+	emitter.setData = function(langKey,codeFile,...testCaseFiles){
 		if(!checkLangugeValidity(langKey)){
 			emitter.emit("langKeyError",new Error("Invalid Language"));
 			return;
@@ -54,13 +54,15 @@ const getEmitter = ()=>{
 			emitter.emit("fileError",new Error("Code File Does Not Exist"));
 			return;
 		}
-		if(!checkFile(testCaseFile)){
-			emitter.emit("fileError",new Error("Test Case File Does Not Exist"));
-			return;
-		}
+		testCaseFiles.forEach((testCaseFile)=>{
+			if(!checkFile(testCaseFile)){
+				emitter.emit("fileError",new Error("Test Case File Does Not Exist"));
+				return;
+			}
+		});
 		this.language = langObj[langKey];
 		this.codefile = codeFile;
-		this.testcasefile = testCaseFile;
+		this.testcasefiles = testCaseFiles;
 		emitter.emit("success");
 		return;
 	}

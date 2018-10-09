@@ -33,7 +33,7 @@ const handler = (emitter)=>{
 
 			}).then((data)=>{
 
-				return stage.four("python2",emitter.codefile,emitter.testcasefile,exec_commands["python2"]);
+				return stage.four("python2",emitter.codefile,emitter.testcasefiles,exec_commands["python2"]);
 			
 			}).then((data)=>{
 
@@ -57,7 +57,7 @@ const handler = (emitter)=>{
 
 			}).then((data)=>{
 
-				return stage.four("python3",emitter.codefile,emitter.testcasefile,exec_commands["python3"]);
+				return stage.four("python3",emitter.codefile,emitter.testcasefiles,exec_commands["python3"]);
 			
 			}).then((data)=>{
 
@@ -85,7 +85,7 @@ const handler = (emitter)=>{
 
 			}).then((data)=>{
 
-				return stage.four("c",emitter.codefile,emitter.testcasefile,exec_commands["c"]);
+				return stage.four("c",emitter.codefile,emitter.testcasefiles,exec_commands["c"]);
 
 			}).then((data)=>{
 
@@ -113,7 +113,7 @@ const handler = (emitter)=>{
 
 			}).then((data)=>{
 
-				return stage.four("cpp",emitter.codefile,emitter.testcasefile,exec_commands["cpp"]);
+				return stage.four("cpp",emitter.codefile,emitter.testcasefiles,exec_commands["cpp"]);
 
 			}).then((data)=>{
 

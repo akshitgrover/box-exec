@@ -13,7 +13,7 @@ it("Should Compile/Execute C Code",(done)=>{
 	boxExec.on("success",()=>{
 		boxExec.execute();
 	});
-	boxExec.setData("11",path.join(__dirname + "/test_code.c"),path.join(__dirname + "/case.txt"));
+	boxExec.setData("11",path.join(__dirname + "/test_code.c"),path.join(__dirname + "/case.txt"), path.join(__dirname + "/case.txt"));
 });
 
 it("Should Compile/Execute C++ Code",(done)=>{
