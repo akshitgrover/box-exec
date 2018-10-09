@@ -19,6 +19,8 @@ limitations under the License.
 const child = require("child_process");
 const fs = require("fs");
 
+const queue = new (require("./concurrencyHandler.js"))();
+
 //Stage One : Check State Of Container
 
 const one = (image,lang)=>{
@@ -99,19 +101,24 @@ const four = (lang,codefile,testcasefiles,command)=>{
 
 		testcasefiles.forEach((testcasefile)=>{
 
-			let testCaseStream = fs.createReadStream(testcasefile);
-			let childProcess = child.exec("docker container exec -i " + container_name + " " + command + filename,(error,stdout,stderr)=>{
-				testCaseStream.unpipe();
-				testCaseStream.destroy();
-				if(error || stderr){
-					reject(error || stderr);
-				}
-				if(stderr){
-					reject(stderr);
-				}
-				resolve(stdout);
-			});
-			testCaseStream.pipe(childProcess.stdin);
+			let asyncTask = ()=>{
+				
+				let testCaseStream = fs.createReadStream(testcasefile);
+				let childProcess = child.exec("docker container exec -i " + container_name + " " + command + filename,(error,stdout,stderr)=>{
+					testCaseStream.unpipe();
+					testCaseStream.destroy();
+					if(error || stderr){
+						reject(error || stderr);
+					}
+					if(stderr){
+						reject(stderr);
+					}
+					resolve(stdout);
+				});
+				testCaseStream.pipe(childProcess.stdin);
+				
+			}
+			queue.queuePush(asyncTask);
 		
 		});
 		
