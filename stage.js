@@ -99,6 +99,17 @@ const four = (lang,codefile,testcasefiles,command)=>{
 	}
 	return new Promise((resolve,reject)=>{
 
+		let result = {};
+
+		let count = 0;
+		let innerCb = ()=>{
+
+			if(++count == testcasefiles.length){
+				resolve(result);
+			}
+
+		}
+
 		testcasefiles.forEach((testcasefile)=>{
 
 			let asyncTask = ()=>{
@@ -107,13 +118,15 @@ const four = (lang,codefile,testcasefiles,command)=>{
 				let childProcess = child.exec("docker container exec -i " + container_name + " " + command + filename,(error,stdout,stderr)=>{
 					testCaseStream.unpipe();
 					testCaseStream.destroy();
-					if(error || stderr){
-						reject(error || stderr);
+					if(error){
+						reject(error);
 					}
 					if(stderr){
-						reject(stderr);
+						innerCb();
+						return result[testcasefile] = {error:true, output:stderr.trim()};
 					}
-					resolve(stdout);
+					innerCb();
+					result[testcasefile] = {error:false, output:stdout.trim()};
 				});
 				testCaseStream.pipe(childProcess.stdin);
 				

@@ -37,7 +37,7 @@ const handler = (emitter)=>{
 			
 			}).then((data)=>{
 
-				emitter.output = data.trim();
+				emitter.output = data;
 				emitter.emit("output");
 
 			}).catch((error)=>{
@@ -61,7 +61,7 @@ const handler = (emitter)=>{
 			
 			}).then((data)=>{
 
-				emitter.output = data.trim();
+				emitter.output = data;
 				emitter.emit("output");
 
 			}).catch((error)=>{
@@ -89,7 +89,7 @@ const handler = (emitter)=>{
 
 			}).then((data)=>{
 
-				emitter.output = data.trim();
+				emitter.output = data;
 				emitter.emit("output");
 
 			}).catch((error)=>{
@@ -117,7 +117,7 @@ const handler = (emitter)=>{
 
 			}).then((data)=>{
 
-				emitter.output = data.trim();
+				emitter.output = data;
 				emitter.emit("output");
 
 			}).catch((error)=>{

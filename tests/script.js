@@ -4,7 +4,7 @@ const path = require("path");
 it("Should Compile/Execute C Code",(done)=>{
 	const boxExec = require("./../index.js")();
 	boxExec.on("output",()=>{
-		expect(boxExec.output).toBe("791116182579111618257911161825791116182572");
+		expect(boxExec.output[path.join(__dirname + "/case.txt")].output).toBe("791116182579111618257911161825791116182572");
 		done();
 	});
 	boxExec.on("error",()=>{
@@ -19,7 +19,7 @@ it("Should Compile/Execute C Code",(done)=>{
 it("Should Compile/Execute C++ Code",(done)=>{
 	const boxExec = require("./../index.js")();
 	boxExec.on("output",()=>{
-		expect(boxExec.output).toBe("791116182579111618257911161825791116182572");
+		expect(boxExec.output[path.join(__dirname + "/case.txt")].output).toBe("791116182579111618257911161825791116182572");
 		done();
 	});
 	boxExec.on("error",()=>{
@@ -34,7 +34,7 @@ it("Should Compile/Execute C++ Code",(done)=>{
 it("Should Compile/Execute python3 Code",(done)=>{
 	const boxExec = require("./../index.js")();
 	boxExec.on("output",()=>{
-		expect(boxExec.output).toBe("7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n72");
+		expect(boxExec.output[path.join(__dirname + "/case.txt")].output).toBe("7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n72");
 		done();
 	});
 	boxExec.on("error",()=>{
@@ -49,7 +49,7 @@ it("Should Compile/Execute python3 Code",(done)=>{
 it("Should Compile/Execute python2 Code",(done)=>{
 	const boxExec = require("./../index.js")();
 	boxExec.on("output",()=>{
-		expect(boxExec.output).toBe("7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n72");
+		expect(boxExec.output[path.join(__dirname + "/case.txt")].output).toBe("7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n72");
 		done();
 	});
 	boxExec.on("error",()=>{
