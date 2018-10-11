@@ -2,7 +2,17 @@
 
 Refer this file to check out for updates in latest releases.
 
-## [v1.0.4](https://npmjs.org/package/box-exec) | 10-08-2018 |
+## [v1.0.5](https://npmjs.org/package/box-exec) | 12-10-2018 |
+
+Note: This is a bug fix release
+* Refactor execution output to support multiple test case files.
+  > Returns object:
+  
+  > Key: testcase file path string.
+  
+  > Value: {error: boolean, output: string} 
+
+## [v1.0.4](https://npmjs.org/package/box-exec/v/1.0.4) | 10-10-2018 |
 
 * Added multipe test case files support.
   > **Pass file paths as seperate arguments (like variadic parameters)**
