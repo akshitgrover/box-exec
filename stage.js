@@ -104,6 +104,7 @@ const four = (lang,codefile,testcasefiles,command)=>{
 		let count = 0;
 		let innerCb = ()=>{
 
+			queue.queueNext();
 			if(++count == testcasefiles.length){
 				resolve(result);
 			}
