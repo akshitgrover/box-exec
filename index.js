@@ -20,6 +20,7 @@ const EventEmitter = require("events");
 const fs = require("fs");
 
 const handler = require("./processhandler.js");
+const { setCPUDistribution } = require("./utils.js");
 
 class ExecEmitter extends EventEmitter{
 	constructor(){
@@ -83,3 +84,5 @@ const getEmitter = ()=>{
 }
 
 module.exports = getEmitter;
+
+module.exports.setCPUDistribution = setCPUDistribution;

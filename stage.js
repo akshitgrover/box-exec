@@ -20,16 +20,17 @@ const child = require("child_process");
 const fs = require("fs");
 
 const queue = new (require("./concurrencyHandler.js"))();
-const { getStageFourTimeout } = require("./utils.js");
+const { getStageFourTimeout, cpuDistribution } = require("./utils.js");
 
 //Stage One : Check State Of Container
 
 const one = (image,lang)=>{
 	const container_name = "box-exec-" + lang;
+	const cpus = cpuDistribution[lang];
 	return new Promise((resolve,reject)=>{
 		child.exec(`docker container inspect --format {{.State.Status}} ${container_name}`,(error,stdout,stderr)=>{
 			if(stderr){
-				child.exec(`docker container run --cpus 1 -id --name ${container_name} ${image}`,(errorf,stdoutf,stderrf)=>{
+				child.exec(`docker container run --cpus ${cpus} -id --name ${container_name} ${image}`,(errorf,stdoutf,stderrf)=>{
 					if(errorf || stderrf){
 						reject();
 					}
