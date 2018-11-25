@@ -20,15 +20,16 @@ const child = require("child_process");
 const fs = require("fs");
 
 const queue = new (require("./concurrencyHandler.js"))();
+const { getStageFourTimeout } = require("./utils.js");
 
 //Stage One : Check State Of Container
 
 const one = (image,lang)=>{
 	const container_name = "box-exec-" + lang;
 	return new Promise((resolve,reject)=>{
-		child.exec("docker container inspect --format {{.State.Status}} " + container_name,(error,stdout,stderr)=>{
+		child.exec(`docker container inspect --format {{.State.Status}} ${container_name}`,(error,stdout,stderr)=>{
 			if(stderr){
-				child.exec("docker container run -id --name " + container_name + " " + image,(errorf,stdoutf,stderrf)=>{
+				child.exec(`docker container run --cpus 1 -id --name ${container_name} ${image}`,(errorf,stdoutf,stderrf)=>{
 					if(errorf || stderrf){
 						reject();
 					}
@@ -36,7 +37,7 @@ const one = (image,lang)=>{
 				});
 			}
 			else if(stdout != "running\n"){
-				child.exec("docker container start " + container_name,(errorf,stdoutf,stderrf)=>{
+				child.exec(`docker container start ${container_name}`,(errorf,stdoutf,stderrf)=>{
 					if(errorf || stderrf){
 						reject();
 					}
@@ -55,7 +56,7 @@ const one = (image,lang)=>{
 const two = (lang,codefile)=>{
 	const container_name = "box-exec-" + lang;
 	return new Promise((resolve,reject)=>{
-		child.exec("docker cp " + codefile + " " + container_name + ":/",(error,stdout,stderr)=>{
+		child.exec(`docker cp ${codefile} ${container_name}:/`,(error,stdout,stderr)=>{
 			if(error || stderr){
 				reject(error || stderr);
 			}
@@ -73,7 +74,7 @@ const three = (lang,codefile)=>{
 	const filename = codefile[codefile.length - 1];
 	const raw_name = filename.slice(0,filename.indexOf(".")) + ".out";
 	return new Promise((resolve,reject)=>{
-		child.exec("docker container exec " + container_name + " g++ -o " + raw_name + " " + filename,(error,stdout,stderr)=>{
+		child.exec(`docker container exec ${container_name} g++ -o ${raw_name} ${filename}`,(error,stdout,stderr)=>{
 			if(error){
 				let idx = error.message.indexOf("\n");
 				error = error.message.slice(idx,error.length);
@@ -111,30 +112,41 @@ const four = (lang,codefile,testcasefiles,command)=>{
 
 		}
 
-		testcasefiles.forEach((testcasefile)=>{
-
+		for(let idx = 0; idx < testcasefiles.length; idx++){
+			testcasefile = testcasefiles[idx]["file"];
+			timeOutBar = parseFloat(testcasefiles[idx]["timeout"]) * 3000;
 			let asyncTask = ()=>{
 				
+				let timeOut;
+				let runTimeDuration = 0;
 				let testCaseStream = fs.createReadStream(testcasefile);
-				let childProcess = child.exec("docker container exec -i " + container_name + " " + command + filename,(error,stdout,stderr)=>{
+				let childProcess = child.exec(`docker container exec -i ${container_name} ${command}${filename}`,(error,stdout,stderr)=>{
+					clearTimeout(timeOut);
 					testCaseStream.unpipe();
 					testCaseStream.destroy();
 					if(error){
-						reject(error);
+						innerCb();
+						return result[testcasefile] = {error:true, timeout:false, output:"Internal server error. Couldn't execute the program."};
 					}
+					runTimeDuration = (new Date()).getTime() - runTimeDuration;
 					if(stderr){
 						innerCb();
-						return result[testcasefile] = {error:true, output:stderr.trim()};
+						return result[testcasefile] = {error:true, timeout:false, output:stderr.trim()};
+					}
+					if(parseFloat(runTimeDuration / 1000) > parseFloat(testcasefiles[idx]["timeout"]) || childProcess.killed === true){
+						innerCb();
+						return result[testcasefile] = {error:true, timeout:true, output: `TLE ${runTimeDuration / 1000}s`};
 					}
 					innerCb();
 					result[testcasefile] = {error:false, output:stdout.trim()};
 				});
 				testCaseStream.pipe(childProcess.stdin);
-				
+				runTimeDuration = (new Date()).getTime();
+				timeOut = getStageFourTimeout(childProcess, timeOutBar, queue);
+
 			}
 			queue.queuePush(asyncTask);
-		
-		});
+		};
 		
 	});
 }

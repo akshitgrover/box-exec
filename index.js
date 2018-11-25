@@ -45,7 +45,7 @@ const checkLangugeValidity = (langKey)=>{
 
 const getEmitter = ()=>{
 	var emitter = new ExecEmitter();
-	emitter.setData = function(langKey,codeFile,...testCaseFiles){
+	emitter.setData = function(langKey,codeFile,testCaseFiles){
 		if(!checkLangugeValidity(langKey)){
 			emitter.emit("langKeyError",new Error("Invalid Language"));
 			return;
@@ -54,12 +54,22 @@ const getEmitter = ()=>{
 			emitter.emit("fileError",new Error("Code File Does Not Exist"));
 			return;
 		}
-		testCaseFiles.forEach((testCaseFile)=>{
+		if(testCaseFiles.constructor !== Array){
+			emitter.emit("formatError", new Error("testCaseFiles is not an array"));
+			return;
+		}
+		for(let idx = 0; idx < testCaseFiles.length; idx++){
+			obj = testCaseFiles[idx];
+			if(!("file" in obj && "timeout" in obj)){
+				emitter.emit("formatError",new Error("Invalid testcase array format\nMake sure array holds obejct with 'timeout' and 'file' properties [... {file:<fileName>, timeout:<time-in-seconds>}]"))
+				break;
+			}
+			testCaseFile = obj["file"];
 			if(!checkFile(testCaseFile)){
 				emitter.emit("fileError",new Error("Test Case File Does Not Exist"));
-				return;
+				break;
 			}
-		});
+		};
 		this.language = langObj[langKey];
 		this.codefile = codeFile;
 		this.testcasefiles = testCaseFiles;

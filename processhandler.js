@@ -38,13 +38,13 @@ const handler = (emitter)=>{
 			}).then((data)=>{
 
 				emitter.output = data;
-				emitter.emit("output");
+				emitter.emit("output", data);
 
 			}).catch((error)=>{
 
 				emitter.error = true;
 				emitter.errortext = error;
-				emitter.emit("error");
+				emitter.emit("error", error);
 
 			});
 			break;
@@ -62,13 +62,13 @@ const handler = (emitter)=>{
 			}).then((data)=>{
 
 				emitter.output = data;
-				emitter.emit("output");
+				emitter.emit("output", data);
 
 			}).catch((error)=>{
 
 				emitter.error = true;
 				emitter.errortext = error;
-				emitter.emit("error");
+				emitter.emit("error", error);
 
 			});
 			break;
@@ -90,13 +90,13 @@ const handler = (emitter)=>{
 			}).then((data)=>{
 
 				emitter.output = data;
-				emitter.emit("output");
+				emitter.emit("output", data);
 
 			}).catch((error)=>{
 
 				emitter.error = true;
 				emitter.errortext = error;
-				emitter.emit("error");
+				emitter.emit("error", error);
 
 			});
 			break;
@@ -118,13 +118,13 @@ const handler = (emitter)=>{
 			}).then((data)=>{
 
 				emitter.output = data;
-				emitter.emit("output");
+				emitter.emit("output", data);
 
 			}).catch((error)=>{
 
 				emitter.error = true;
 				emitter.errortext = error;
-				emitter.emit("error");
+				emitter.emit("error", error);
 
 			});
 			break;
