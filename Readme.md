@@ -19,9 +19,9 @@ Language supported by Box-Execute are:
 * python 2
 * python 3
 
-**NOTE:** Language support is to extended.
+**NOTE:** Language support is to be extended.
 
-For each language supported a docker container is run in which all the codes are executed to get the output.
+For each language supported a docker container is present in which all the codes are executed to get the output.
 
 ## Under the hood
 
