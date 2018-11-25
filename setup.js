@@ -53,19 +53,31 @@ for(let lang in cpuDistribution){
             console.log(stderr);
             throw new Error(stderr);
         }
+        cb();
     });
 }
 
-for(let lang in cpuDistribution){
-    let container_name = `box-exec-${lang}`;
-    let image = imageObj[lang];
-    let cpus = cpuDistribution[lang];
+let count = 0
 
-    cp.exec(`docker container run -id --cpus ${cpus} --name ${container_name} ${image}`, (error, stdout, stderr)=>{
-        let stderrSplit = stderr.split(" ");
-        if(stderrSplit.indexOf("Conflict.") === -1 && stderr.length > 0){
-            throw new Error(stderr);
-        }
-        console.log(`${container_name} container is running with CPUS = ${cpus}`);
-    });
+var cb = ()=>{
+    if(++count == 4){
+        startContainers();
+    }
+}
+
+var startContainers = ()=>{
+
+    for(let lang in cpuDistribution){
+        let container_name = `box-exec-${lang}`;
+        let image = imageObj[lang];
+        let cpus = cpuDistribution[lang];
+
+        cp.exec(`docker container run -id --cpus ${cpus} --name ${container_name} ${image}`, (error, stdout, stderr)=>{
+            let stderrSplit = stderr.split(" ");
+            if(stderrSplit.indexOf("Conflict.") === -1 && stderr.length > 0){
+                throw new Error(stderr);
+            }
+            console.log(`${container_name} container is running with CPUS = ${cpus}`);
+        });
+    }
 }

@@ -15,7 +15,7 @@
     "email": "akshit.grover2016@gmail.com"
   },
   "bin": {
-    "setup": "./setup.js"
+    "setup-boxexec": "./setup.js"
   },
   "keywords": [
     "docker",
