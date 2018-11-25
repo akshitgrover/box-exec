@@ -2,7 +2,7 @@
 
 Refer this file to check out for updates in latest releases.
 
-## [v2.0.0](https://npmjs.org/package/box-exex) | 26-11-2018 |
+## [v2.0.0](https://npmjs.org/package/box-exec) | 26-11-2018 |
 
 * Added testcase timeout support
   > **Testcases are now passed as array fo objects: [... {file:<filename>, timeout: <timeout in seconds>}]**
