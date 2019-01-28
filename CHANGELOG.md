@@ -2,10 +2,15 @@
 
 Refer this file to check out for updates in latest releases.
 
-## [v2.0.0](https://npmjs.org/package/box-exec) | 26-11-2018 |
+## [v2.0.1](https://npmjs.org/package/box-exec) | 29-01-2019 |
+
+* Fix undeclared variables bug
+  > This bug resulted in output of a single testcase even when multiple test cases were passed.
+
+## [v2.0.0](https://npmjs.org/package/box-exec/v/2.0.0) | 26-11-2018 |
 
 * Added testcase timeout support
-  > **Testcases are now passed as array fo objects: [... {file:<filename>, timeout: <timeout in seconds>}]**
+  > **Testcases are now passed as array of objects: [... {file:<filename>, timeout: <timeout in seconds>}]**
   
   > If a testcase execution takes more then the timeout a TLE error {error:true, timeout:true, output: "TLE <execution time> is returned"}
 
