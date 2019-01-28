@@ -16,72 +16,67 @@ limitations under the License.
 
 */
 
-const EventEmitter = require("events");
-const fs = require("fs");
+const EventEmitter = require('events');
+const fs = require('fs');
 
-const handler = require("./processhandler.js");
-const { setCPUDistribution } = require("./utils.js");
+const handler = require('./processhandler.js');
+const { setCPUDistribution } = require('./utils.js');
 
-class ExecEmitter extends EventEmitter{
-	constructor(){
-		super();
-		this.error = false;
-		this.output = null;
-		this.errortext = null;
-		this.language = null;
-		this.codefile = null;
-		this.testcasefiles = null;
-	}
+class ExecEmitter extends EventEmitter {
+  constructor() {
+    super();
+    this.error = false;
+    this.output = null;
+    this.errortext = null;
+    this.language = null;
+    this.codefile = null;
+    this.testcasefiles = null;
+  }
 }
 
-const langObj = require("./lang.js");
+const langObj = require('./lang.js');
 
-const checkFile = (filepath)=>{
-	return fs.existsSync(filepath);
-}
+const checkFile = filepath => fs.existsSync(filepath);
 
-const checkLangugeValidity = (langKey)=>{
-	return langObj.hasOwnProperty(langKey);
-}
+const checkLangugeValidity = langKey => langKey in langObj;
 
-const getEmitter = ()=>{
-	var emitter = new ExecEmitter();
-	emitter.setData = function(langKey,codeFile,testCaseFiles){
-		if(!checkLangugeValidity(langKey)){
-			emitter.emit("langKeyError",new Error("Invalid Language"));
-			return;
-		}
-		if(!checkFile(codeFile)){
-			emitter.emit("fileError",new Error("Code File Does Not Exist"));
-			return;
-		}
-		if(testCaseFiles.constructor !== Array){
-			emitter.emit("formatError", new Error("testCaseFiles is not an array"));
-			return;
-		}
-		for(let idx = 0; idx < testCaseFiles.length; idx++){
-			obj = testCaseFiles[idx];
-			if(!("file" in obj && "timeout" in obj)){
-				emitter.emit("formatError",new Error("Invalid testcase array format\nMake sure array holds obejct with 'timeout' and 'file' properties [... {file:<fileName>, timeout:<time-in-seconds>}]"))
-				break;
-			}
-			testCaseFile = obj["file"];
-			if(!checkFile(testCaseFile)){
-				emitter.emit("fileError",new Error("Test Case File Does Not Exist"));
-				break;
-			}
-		};
-		this.language = langObj[langKey];
-		this.codefile = codeFile;
-		this.testcasefiles = testCaseFiles;
-		emitter.emit("success");
-		return;
-	}
-	emitter.execute = function(){
-		handler(emitter);
-	}
-	return emitter;
-}
+const getEmitter = () => {
+  const emitter = new ExecEmitter();
+  emitter.setData = function setData(langKey, codeFile, testCaseFiles) {
+    if (!checkLangugeValidity(langKey)) {
+      emitter.emit('langKeyError', new Error('Invalid Language'));
+      return;
+    }
+    if (!checkFile(codeFile)) {
+      emitter.emit('fileError', new Error('Code File Does Not Exist'));
+      return;
+    }
+    if (testCaseFiles.constructor !== Array) {
+      emitter.emit('formatError', new Error('testCaseFiles is not an array'));
+      return;
+    }
+    for (let idx = 0; idx < testCaseFiles.length; idx += 1) {
+      const obj = testCaseFiles[idx];
+      if (!('file' in obj && 'timeout' in obj)) {
+        emitter.emit('formatError', new Error("Invalid testcase array format\nMake sure array holds obejct with 'timeout' and 'file' properties [... {file:<fileName>, timeout:<time-in-seconds>}]"));
+        break;
+      }
+      const testCaseFile = obj.file;
+      if (!checkFile(testCaseFile)) {
+        emitter.emit('fileError', new Error('Test Case File Does Not Exist'));
+        break;
+      }
+    }
+    this.language = langObj[langKey];
+    this.codefile = codeFile;
+    this.testcasefiles = testCaseFiles;
+    emitter.emit('success');
+  };
+  emitter.execute = () => {
+    handler(emitter);
+  };
+  return emitter;
+};
 
 module.exports = getEmitter;
 

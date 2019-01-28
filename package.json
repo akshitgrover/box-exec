@@ -15,7 +15,7 @@
     "email": "akshit.grover2016@gmail.com"
   },
   "bin": {
-    "setup-boxexec": "./setup.js"
+    "setup-boxexec": "./bin/setup.js"
   },
   "keywords": [
     "docker",
@@ -24,15 +24,15 @@
     "execute",
     "compile"
   ],
-  "license": {
-    "type": "Apache-2.0",
-    "url": "https://opensource.org/licenses/apache2.0.php"
-  },
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/akshitgrover/box-exec/issues"
   },
   "homepage": "https://github.com/akshitgrover/box-exec#readme",
   "devDependencies": {
+    "eslint": "^5.12.1",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.15.0",
     "expect": "^22.4.3",
     "mocha": "^5.1.1"
   }

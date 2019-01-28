@@ -16,123 +16,78 @@ limitations under the License.
 
 */
 
-const stage = require("./stage.js");
-const lang_string = require("./lang.js");
-const docker_image = require("./dockerimage_lib.js");
-const exec_commands = require("./exec_commands.js");
+const stage = require('./stage.js');
+const dockerImage = require('./dockerimage_lib.js');
+const execCommands = require('./exec_commands.js');
 
-const handler = (emitter)=>{
-	
-	switch(emitter.language){
+const handler = (emitter) => {
+  const e = emitter;
 
-		case "python2":
+  switch (e.language) {
+    case 'python2':
+      stage.one(dockerImage.python2, 'python2')
+        .then(() => stage.two('python2', e.codefile))
+        .then(() => stage.four('python2', e.codefile, e.testcasefiles, execCommands.python2))
+        .then((data) => {
+          e.output = data;
+          e.emit('output', data);
+        })
+        .catch((error) => {
+          e.error = true;
+          e.errortext = error;
+          e.emit('error', error);
+        });
+      break;
 
-			stage.one(docker_image["python2"],"python2").then(()=>{
+    case 'python3':
+      stage.one(dockerImage.python3, 'python3')
+        .then(() => stage.two('python3', e.codefile))
+        .then(() => stage.four('python3', e.codefile, e.testcasefiles, execCommands.python3))
+        .then((data) => {
+          e.output = data;
+          e.emit('output', data);
+        })
+        .catch((error) => {
+          e.error = true;
+          e.errortext = error;
+          e.emit('error', error);
+        });
+      break;
 
-				return stage.two("python2",emitter.codefile);
+    case 'c':
+      stage.one(dockerImage.c, 'c')
+        .then(() => stage.two('c', e.codefile))
+        .then(() => stage.three('c', e.codefile))
+        .then(() => stage.four('c', e.codefile, e.testcasefiles, execCommands.c))
+        .then((data) => {
+          e.output = data;
+          e.emit('output', data);
+        })
+        .catch((error) => {
+          e.error = true;
+          e.errortext = error;
+          e.emit('error', error);
+        });
+      break;
 
-			}).then((data)=>{
+    case 'cpp':
+      stage.one(dockerImage.cpp, 'cpp')
+        .then(() => stage.two('cpp', e.codefile))
+        .then(() => stage.three('cpp', e.codefile))
+        .then(() => stage.four('cpp', e.codefile, e.testcasefiles, execCommands.cpp))
+        .then((data) => {
+          e.output = data;
+          e.emit('output', data);
+        })
+        .catch((error) => {
+          e.error = true;
+          e.errortext = error;
+          e.emit('error', error);
+        });
+      break;
 
-				return stage.four("python2",emitter.codefile,emitter.testcasefiles,exec_commands["python2"]);
-			
-			}).then((data)=>{
-
-				emitter.output = data;
-				emitter.emit("output", data);
-
-			}).catch((error)=>{
-
-				emitter.error = true;
-				emitter.errortext = error;
-				emitter.emit("error", error);
-
-			});
-			break;
-
-		case "python3":
-
-			stage.one(docker_image["python3"],"python3").then(()=>{
-
-				return stage.two("python3",emitter.codefile);
-
-			}).then((data)=>{
-
-				return stage.four("python3",emitter.codefile,emitter.testcasefiles,exec_commands["python3"]);
-			
-			}).then((data)=>{
-
-				emitter.output = data;
-				emitter.emit("output", data);
-
-			}).catch((error)=>{
-
-				emitter.error = true;
-				emitter.errortext = error;
-				emitter.emit("error", error);
-
-			});
-			break;
-		
-		case "c":
-
-			stage.one(docker_image["c"],"c").then(()=>{
-
-				return stage.two("c",emitter.codefile);
-
-			}).then((data)=>{
-
-				return stage.three("c",emitter.codefile);
-
-			}).then((data)=>{
-
-				return stage.four("c",emitter.codefile,emitter.testcasefiles,exec_commands["c"]);
-
-			}).then((data)=>{
-
-				emitter.output = data;
-				emitter.emit("output", data);
-
-			}).catch((error)=>{
-
-				emitter.error = true;
-				emitter.errortext = error;
-				emitter.emit("error", error);
-
-			});
-			break;
-		
-		case "cpp":
-
-			stage.one(docker_image["cpp"],"cpp").then(()=>{
-
-				return stage.two("cpp",emitter.codefile);
-
-			}).then((data)=>{
-
-				return stage.three("cpp",emitter.codefile);
-
-			}).then((data)=>{
-
-				return stage.four("cpp",emitter.codefile,emitter.testcasefiles,exec_commands["cpp"]);
-
-			}).then((data)=>{
-
-				emitter.output = data;
-				emitter.emit("output", data);
-
-			}).catch((error)=>{
-
-				emitter.error = true;
-				emitter.errortext = error;
-				emitter.emit("error", error);
-
-			});
-			break;
-
-		default:
-			//empty
-
-	}
-}
+    default: // empty
+  }
+};
 
 module.exports = handler;

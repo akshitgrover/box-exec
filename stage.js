@@ -16,145 +16,150 @@ limitations under the License.
 
 */
 
-const child = require("child_process");
-const fs = require("fs");
+const child = require('child_process');
+const fs = require('fs');
 
-const queue = new (require("./concurrencyHandler.js"))();
-const { getStageFourTimeout, cpuDistribution } = require("./utils.js");
+const ConcurrencyHandler = require('./concurrencyHandler.js');
+const { getStageFourTimeout, cpuDistribution } = require('./utils.js');
 
-//Stage One : Check State Of Container
+const queue = new ConcurrencyHandler();
 
-const one = (image,lang)=>{
-	const container_name = "box-exec-" + lang;
-	const cpus = cpuDistribution[lang];
-	return new Promise((resolve,reject)=>{
-		child.exec(`docker container inspect --format {{.State.Status}} ${container_name}`,(error,stdout,stderr)=>{
-			if(stderr){
-				child.exec(`docker container run --cpus ${cpus} -id --name ${container_name} ${image}`,(errorf,stdoutf,stderrf)=>{
-					if(errorf || stderrf){
-						reject();
-					}
-					resolve();
-				});
-			}
-			else if(stdout != "running\n"){
-				child.exec(`docker container start ${container_name}`,(errorf,stdoutf,stderrf)=>{
-					if(errorf || stderrf){
-						reject();
-					}
-					resolve();
-				});
-			}
-			else{
-				resolve();
-			}
-		});
-	});
-}
+// Stage One : Check State Of Container
 
-//Stage Two : Copy Source Code File In The Container
+const one = (image, lang) => {
+  const containerName = `box-exec-${lang}`;
+  const cpus = cpuDistribution[lang];
+  return new Promise((resolve, reject) => {
+    child.exec(`docker container inspect --format {{.State.Status}} ${containerName}`, (error, stdout, stderr) => {
+      if (stderr) {
+        child.exec(`docker container run --cpus ${cpus} -id --name ${containerName} ${image}`, (errorf, stdoutf, stderrf) => {
+          if (errorf || stderrf) {
+            reject();
+          }
+          resolve();
+        });
+      } else if (stdout !== 'running\n') {
+        child.exec(`docker container start ${containerName}`, (errorf, stdoutf, stderrf) => {
+          if (errorf || stderrf) {
+            reject();
+          }
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+    });
+  });
+};
 
-const two = (lang,codefile)=>{
-	const container_name = "box-exec-" + lang;
-	return new Promise((resolve,reject)=>{
-		child.exec(`docker cp ${codefile} ${container_name}:/`,(error,stdout,stderr)=>{
-			if(error || stderr){
-				reject(error || stderr);
-			}
-			resolve(stdout);
-		});
-	});
-}
+// Stage Two : Copy Source Code File In The Container
 
-//Stage Three: Compile Source Code File (only for c/c++)
+const two = (lang, codefile) => {
+  const containerName = `box-exec-${lang}`;
+  return new Promise((resolve, reject) => {
+    child.exec(`docker cp ${codefile} ${containerName}:/`, (error, stdout, stderr) => {
+      if (error || stderr) {
+        reject(error || stderr);
+      }
+      resolve(stdout);
+    });
+  });
+};
 
-const three = (lang,codefile)=>{
-	const container_name = "box-exec-" + lang;
-	codefile = codefile.replace(/\\/g,"/");
-	codefile = codefile.split("/");	
-	const filename = codefile[codefile.length - 1];
-	const raw_name = filename.slice(0,filename.indexOf(".")) + ".out";
-	return new Promise((resolve,reject)=>{
-		child.exec(`docker container exec ${container_name} g++ -o ${raw_name} ${filename}`,(error,stdout,stderr)=>{
-			if(error){
-				let idx = error.message.indexOf("\n");
-				error = error.message.slice(idx,error.length);
-				reject(error);
-			}
-			if(stderr){
-				reject(stderr);
-			}
-			resolve(stdout);
-		});
-	});
-}
+// Stage Three: Compile Source Code File (only for c/c++)
 
-//Stage Four: Execute Source Code
+const three = (lang, cfile) => {
+  let codefile = cfile;
+  const containerName = `box-exec-${lang}`;
+  codefile = codefile.replace(/\\/g, '/');
+  codefile = codefile.split('/');
+  const filename = codefile[codefile.length - 1];
+  const rawName = `${filename.slice(0, filename.indexOf('.'))}.out`;
+  return new Promise((resolve, reject) => {
+    child.exec(`docker container exec ${containerName} g++ -o ${rawName} ${filename}`,
+      (err, stdout, stderr) => {
+        let error = err;
+        if (error) {
+          const idx = error.message.indexOf('\n');
+          error = error.message.slice(idx, error.length);
+          reject(error);
+        }
+        if (stderr) {
+          reject(stderr);
+        }
+        resolve(stdout);
+      });
+  });
+};
 
-const four = (lang,codefile,testcasefiles,command)=>{
-	const container_name = "box-exec-" + lang;
-	codefile = codefile.replace(/\\/g,"/");
-	codefile = codefile.split("/");
-	let filename = codefile[codefile.length - 1];
-	if(lang == "c" || lang == "cpp"){
-		filename = filename.slice(0,filename.indexOf(".")) + ".out";
-	}
-	return new Promise((resolve,reject)=>{
+// Stage Four: Execute Source Code
 
-		let result = {};
+const four = (lang, cfile, testcasefiles, command) => {
+  let codefile = cfile;
+  const containerName = `box-exec-${lang}`;
+  codefile = codefile.replace(/\\/g, '/');
+  codefile = codefile.split('/');
+  let filename = codefile[codefile.length - 1];
+  if (lang === 'c' || lang === 'cpp') {
+    filename = `${filename.slice(0, filename.indexOf('.'))}.out`;
+  }
+  return new Promise((resolve) => {
+    const result = {};
 
-		let count = 0;
-		let innerCb = ()=>{
+    let count = 0;
+    const innerCb = () => {
+      queue.queueNext();
+      count += 1;
+      if (count === testcasefiles.length) {
+        resolve(result);
+      }
+    };
 
-			queue.queueNext();
-			if(++count == testcasefiles.length){
-				resolve(result);
-			}
-
-		}
-
-		for(let idx = 0; idx < testcasefiles.length; idx++){
-			testcasefile = testcasefiles[idx]["file"];
-			timeOutBar = parseFloat(testcasefiles[idx]["timeout"]) * 3000;
-			let asyncTask = ()=>{
-				
-				let timeOut;
-				let runTimeDuration = 0;
-				let testCaseStream = fs.createReadStream(testcasefile);
-				let childProcess = child.exec(`docker container exec -i ${container_name} ${command}${filename}`,(error,stdout,stderr)=>{
-					clearTimeout(timeOut);
-					testCaseStream.unpipe();
-					testCaseStream.destroy();
-					if(error){
-						innerCb();
-						return result[testcasefile] = {error:true, timeout:false, output:"Internal server error. Couldn't execute the program."};
-					}
-					runTimeDuration = (new Date()).getTime() - runTimeDuration;
-					if(stderr){
-						innerCb();
-						return result[testcasefile] = {error:true, timeout:false, output:stderr.trim()};
-					}
-					if(parseFloat(runTimeDuration / 1000) > parseFloat(testcasefiles[idx]["timeout"]) || childProcess.killed === true){
-						innerCb();
-						return result[testcasefile] = {error:true, timeout:true, output: `TLE ${runTimeDuration / 1000}s`};
-					}
-					innerCb();
-					result[testcasefile] = {error:false, output:stdout.trim()};
-				});
-				testCaseStream.pipe(childProcess.stdin);
-				runTimeDuration = (new Date()).getTime();
-				timeOut = getStageFourTimeout(childProcess, timeOutBar, queue);
-
-			}
-			queue.queuePush(asyncTask);
-		};
-		
-	});
-}
+    for (let idx = 0; idx < testcasefiles.length; idx += 1) {
+      const testcasefile = testcasefiles[idx].file;
+      const timeOutBar = parseFloat(testcasefiles[idx].timeout) * 3000;
+      const asyncTask = () => {
+        let timeOut;
+        let runTimeDuration = 0;
+        const testCaseStream = fs.createReadStream(testcasefile);
+        const childProcess = child.exec(`docker container exec -i ${containerName} ${command}${filename}`,
+          (error, stdout, stderr) => {
+            clearTimeout(timeOut);
+            testCaseStream.unpipe();
+            testCaseStream.destroy();
+            if (error) {
+              innerCb();
+              result[testcasefile] = { error: true, timeout: false, output: "Internal server error. Couldn't execute the program." };
+              return null;
+            }
+            runTimeDuration = (new Date()).getTime() - runTimeDuration;
+            if (stderr) {
+              innerCb();
+              result[testcasefile] = { error: true, timeout: false, output: stderr.trim() };
+              return null;
+            }
+            if (parseFloat(runTimeDuration / 1000) > parseFloat(testcasefiles[idx].timeout)
+              || childProcess.killed === true) {
+              innerCb();
+              result[testcasefile] = { error: true, timeout: true, output: `TLE ${runTimeDuration / 1000}s` };
+              return null;
+            }
+            innerCb();
+            result[testcasefile] = { error: false, output: stdout.trim() };
+            return null;
+          });
+        testCaseStream.pipe(childProcess.stdin);
+        runTimeDuration = (new Date()).getTime();
+        timeOut = getStageFourTimeout(childProcess, timeOutBar, queue);
+      };
+      queue.queuePush(asyncTask);
+    }
+  });
+};
 
 module.exports = {
-	one,
-	two,
-	three,
-	four
-}
+  one,
+  two,
+  three,
+  four,
+};

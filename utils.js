@@ -16,39 +16,19 @@ limitations under the License.
 
 */
 
-let cpuDistribution = {"c":1, "cpp":1, "python2": 1, "python3": 1}
-let configured = false;
+const cpuDistribution = {
+  c: 1,
+  cpp: 1,
+  python2: 1,
+  python3: 1,
+};
 
 module.exports = {
-
-    getStageFourTimeout(cp, timeOut, queue) {
-        return setTimeout(()=>{
-            cp.kill("SIGINT");
-            queue.queueNext();
-        }, timeOut);
-    },
-
-    setCPUDistribution(obj){
-
-        if(configured === true){
-            throw new Error("CPU Distribution can only be configured at the startup");
-        }
-        let missing = [];
-        let distribution = {};
-        for(lang in cpuDistribution){
-            if(!(lang in obj)){
-                missing.push(lang);
-            }
-            distribution[lang] = obj[lang];
-        }
-        if(missing.length > 0){
-            return missing;
-        }
-        configured = true;
-        return null;
-
-    },
-
-    cpuDistribution
-
-}
+  getStageFourTimeout(cp, timeOut, queue) {
+    return setTimeout(() => {
+      cp.kill('SIGINT');
+      queue.queueNext();
+    }, timeOut);
+  },
+  cpuDistribution,
+};
