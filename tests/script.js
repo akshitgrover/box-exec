@@ -20,7 +20,7 @@ it('Should Compile/Execute C Code', (done) => {
   boxExec.on('success', () => {
     boxExec.execute();
   });
-  boxExec.setData('11', path.join(`${__dirname}/test_code.c`), [{ file: path.join(`${__dirname}/case.txt`), timeout: 2 }, { file: path.join(`${__dirname}/case.txt`), timeout: 2 }]);
+  boxExec.setData('11', path.join(`${__dirname}/test_code.c`), [{ file: path.join(`${__dirname}/case.txt`), timeout: 2 }, { file: path.join(`${__dirname}/tc.txt`), timeout: 2 }]);
 });
 
 it('Should Compile/Execute C++ Code', (done) => {
