@@ -105,7 +105,6 @@ const four = (lang, cfile, testcasefiles, command) => {
   }
   return new Promise((resolve) => {
     const result = {};
-
     let count = 0;
     const innerCb = () => {
       queue.queueNext();
@@ -114,45 +113,57 @@ const four = (lang, cfile, testcasefiles, command) => {
         resolve(result);
       }
     };
-
-    for (let idx = 0; idx < testcasefiles.length; idx += 1) {
-      const testcasefile = testcasefiles[idx].file;
-      const timeOutBar = parseFloat(testcasefiles[idx].timeout) * 3000;
-      const asyncTask = () => {
-        let timeOut;
-        let runTimeDuration = 0;
-        const testCaseStream = fs.createReadStream(testcasefile);
-        const childProcess = child.exec(`docker container exec -i ${containerName} ${command}${filename}`,
-          (error, stdout, stderr) => {
-            clearTimeout(timeOut);
-            testCaseStream.unpipe();
-            testCaseStream.destroy();
-            if (error) {
-              innerCb();
-              result[testcasefile] = { error: true, timeout: false, output: "Internal server error. Couldn't execute the program." };
-              return null;
-            }
-            runTimeDuration = (new Date()).getTime() - runTimeDuration;
-            if (stderr) {
-              innerCb();
-              result[testcasefile] = { error: true, timeout: false, output: stderr.trim() };
-              return null;
-            }
-            if (parseFloat(runTimeDuration / 1000) > parseFloat(testcasefiles[idx].timeout)
-              || childProcess.killed === true) {
-              innerCb();
-              result[testcasefile] = { error: true, timeout: true, output: `TLE ${runTimeDuration / 1000}s` };
-              return null;
-            }
+    const asyncTask = (timeOutBar, testCaseFile, timeLimit) => {
+      let timeOut;
+      let runTimeDuration = 0;
+      const testCaseStream = fs.createReadStream(testCaseFile);
+      const childProcess = child.exec(`docker container exec -i ${containerName} ${command}${filename}`,
+        (error, stdout, stderr) => {
+          clearTimeout(timeOut);
+          testCaseStream.unpipe();
+          testCaseStream.destroy();
+          if (error) {
             innerCb();
-            result[testcasefile] = { error: false, output: stdout.trim() };
+            result[testCaseFile] = {
+              error: true,
+              timeout: false,
+              output: "Internal server error. Couldn't execute the program.",
+            };
             return null;
-          });
-        testCaseStream.pipe(childProcess.stdin);
-        runTimeDuration = (new Date()).getTime();
-        timeOut = getStageFourTimeout(childProcess, timeOutBar, queue);
-      };
-      queue.queuePush(asyncTask);
+          }
+          runTimeDuration = (new Date()).getTime() - runTimeDuration;
+          if (stderr) {
+            innerCb();
+            result[testCaseFile] = {
+              error: true,
+              timeout: false,
+              output: stderr.trim(),
+            };
+            return null;
+          }
+          if (parseFloat(runTimeDuration / 1000)
+            > parseFloat(timeLimit) || childProcess.killed === true) {
+            innerCb();
+            result[testCaseFile] = {
+              error: true,
+              timeout: true,
+              output: `TLE ${runTimeDuration / 1000}s`,
+            };
+            return null;
+          }
+          innerCb();
+          result[testCaseFile] = { error: false, output: stdout.trim() };
+          return null;
+        });
+      testCaseStream.pipe(childProcess.stdin);
+      runTimeDuration = (new Date()).getTime();
+      timeOut = getStageFourTimeout(childProcess, timeOutBar, queue);
+    };
+    for (let idx = 0; idx < testcasefiles.length; idx += 1) {
+      const testCaseFile = testcasefiles[idx].file;
+      const timeOutBar = parseFloat(testcasefiles[idx].timeout) * 3000;
+      const timeLimit = testcasefiles[idx].timeout;
+      queue.queuePush(asyncTask.bind(this, timeOutBar, testCaseFile, timeLimit));
     }
   });
 };
