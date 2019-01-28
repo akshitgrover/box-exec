@@ -1,9 +1,9 @@
-const expect = require('expect');
 const path = require('path');
 
-const index = require('./../index.js');
-
+const expect = require('expect');
 const { it } = require('mocha');
+
+const index = require('./../index.js');
 
 it('Should Compile/Execute C Code', (done) => {
   const boxExec = index();
