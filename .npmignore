@@ -1,0 +1,11 @@
+.gitignore
+.vscode
+CHANGELOG.md
+README.md
+.travis.yml
+.eslintrc.json
+tests
+Dockerfiles
+node_modules
+examples
+.editorconfig

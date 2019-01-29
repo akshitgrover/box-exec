@@ -3,7 +3,7 @@ const path = require('path');
 const expect = require('expect');
 const { it } = require('mocha');
 
-const index = require('./../index.js');
+const index = require('./../src/index.js');
 
 it('Should Compile/Execute C Code', (done) => {
   const boxExec = index();

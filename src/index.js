@@ -19,7 +19,7 @@ limitations under the License.
 const EventEmitter = require('events');
 const fs = require('fs');
 
-const handler = require('./processhandler.js');
+const handler = require('./processHandler.js');
 const { setCPUDistribution } = require('./utils.js');
 
 class ExecEmitter extends EventEmitter {

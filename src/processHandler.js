@@ -17,8 +17,8 @@ limitations under the License.
 */
 
 const stage = require('./stage.js');
-const dockerImage = require('./dockerimage_lib.js');
-const execCommands = require('./exec_commands.js');
+const dockerImage = require('./dockerimageLib.js');
+const execCommands = require('./execCommands.js');
 
 const handler = (emitter) => {
   const e = emitter;
