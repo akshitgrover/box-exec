@@ -55,7 +55,11 @@ const one = async (image, lang) => {
         throw new Error(`Error creating container ${containerName}`);
       }
     } else {
-      throw err;
+      if(err.stderr) {
+        throw new Error(err.stderr);
+      } else {
+        throw err;
+      }
     }
   }
 };
@@ -67,7 +71,11 @@ const two = async (lang, codefile) => {
   try {
     await exec(`docker cp ${codefile} ${containerName}:/`);
   } catch (err) {
-    throw err;
+    if(err.stderr) {
+      throw new Error(err.stderr);
+    } else {
+      throw err;
+    }
   }
 };
 
@@ -85,7 +93,11 @@ const three = async (lang, cfile) => {
       docker container exec ${containerName} g++ -o ${rawName} ${fileName}
     `);
   } catch (err) {
-    throw err;
+    if(err.stderr) {
+      throw new Error(err.stderr);
+    } else {
+      throw err;
+    }
   }
 };
 
