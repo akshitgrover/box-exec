@@ -38,7 +38,7 @@ const one = async (image, lang) => {
         docker container inspect --format {{.State.Status}} ${containerName}
       `);
     } catch (err) {
-      throw Error(`Container does not exist`);
+      throw new Error('Container does not exist');
     }
     if (output.stdout.trim() !== 'running') {
       await exec(`
@@ -51,27 +51,24 @@ const one = async (image, lang) => {
         await exec(`
           docker container run --cpus ${cpus} -id --name ${containerName} ${image}
         `);
-      } catch (err) {
-          throw Error(`Error creating container ${containerName}`);
+      } catch (error) {
+        throw new Error(`Error creating container ${containerName}`);
       }
     } else {
-      throw Error(err);
+      throw err;
     }
   }
 };
 
 // Stage Two : Copy Source Code File In The Container
 
-const two = (lang, codefile) => {
+const two = async (lang, codefile) => {
   const containerName = `box-exec-${lang}`;
-  return new Promise((resolve, reject) => {
-    child.exec(`docker cp ${codefile} ${containerName}:/`, (error, stdout, stderr) => {
-      if (error || stderr) {
-        reject(error || stderr);
-      }
-      resolve(stdout);
-    });
-  });
+  try {
+    await exec(`docker cp ${codefile} ${containerName}:/`);
+  } catch (err) {
+    throw err;
+  }
 };
 
 // Stage Three: Compile Source Code File (only for c/c++)
