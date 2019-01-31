@@ -73,28 +73,20 @@ const two = async (lang, codefile) => {
 
 // Stage Three: Compile Source Code File (only for c/c++)
 
-const three = (lang, cfile) => {
+const three = async (lang, cfile) => {
   let codefile = cfile;
-  const containerName = `box-exec-${lang}`;
   codefile = codefile.replace(/\\/g, '/');
   codefile = codefile.split('/');
-  const filename = codefile[codefile.length - 1];
-  const rawName = `${filename.slice(0, filename.indexOf('.'))}.out`;
-  return new Promise((resolve, reject) => {
-    child.exec(`docker container exec ${containerName} g++ -o ${rawName} ${filename}`,
-      (err, stdout, stderr) => {
-        let error = err;
-        if (error) {
-          const idx = error.message.indexOf('\n');
-          error = error.message.slice(idx, error.length);
-          reject(error);
-        }
-        if (stderr) {
-          reject(stderr);
-        }
-        resolve(stdout);
-      });
-  });
+  const containerName = `box-exec-${lang}`;
+  const fileName = codefile[codefile.length - 1];
+  const rawName = `${fileName.slice(0, fileName.indexOf('.'))}.out`;
+  try {
+    await exec(`
+      docker container exec ${containerName} g++ -o ${rawName} ${fileName}
+    `);
+  } catch (err) {
+    throw err;
+  }
 };
 
 // Stage Four: Execute Source Code
