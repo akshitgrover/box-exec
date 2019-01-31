@@ -24,7 +24,6 @@ const ConcurrencyHandler = require('./concurrencyHandler.js');
 const { getStageFourTimeout, cpuDistribution } = require('./utils.js');
 
 const exec = promisify(child.exec);
-const queue = new ConcurrencyHandler();
 
 // Stage One : Check State Of Container
 
@@ -55,11 +54,10 @@ const one = async (image, lang) => {
         throw new Error(`Error creating container ${containerName}`);
       }
     } else {
-      if(err.stderr) {
+      if (err.stderr) {
         throw new Error(err.stderr);
-      } else {
-        throw err;
       }
+      throw err;
     }
   }
 };
@@ -71,7 +69,7 @@ const two = async (lang, codefile) => {
   try {
     await exec(`docker cp ${codefile} ${containerName}:/`);
   } catch (err) {
-    if(err.stderr) {
+    if (err.stderr) {
       throw new Error(err.stderr);
     } else {
       throw err;
@@ -93,7 +91,7 @@ const three = async (lang, cfile) => {
       docker container exec ${containerName} g++ -o ${rawName} ${fileName}
     `);
   } catch (err) {
-    if(err.stderr) {
+    if (err.stderr) {
       throw new Error(err.stderr);
     } else {
       throw err;
@@ -103,7 +101,7 @@ const three = async (lang, cfile) => {
 
 // Stage Four: Execute Source Code
 
-const four = (lang, cfile, testcasefiles, command) => {
+const four = (lang, cfile, testCaseFiles, command) => {
   let codefile = cfile;
   const containerName = `box-exec-${lang}`;
   codefile = codefile.replace(/\\/g, '/');
@@ -112,74 +110,73 @@ const four = (lang, cfile, testcasefiles, command) => {
   if (lang === 'c' || lang === 'cpp') {
     filename = `${filename.slice(0, filename.indexOf('.'))}.out`;
   }
-  return new Promise((resolve) => {
-    const result = {};
-    let count = 0;
-    const innerCb = () => {
+  let count = 0;
+  let innerCb;
+  const result = {};
+  const queue = new ConcurrencyHandler();
+  const pinger = () => new Promise((resolve) => {
+    innerCb = () => {
       queue.queueNext();
       count += 1;
-      if (count === testcasefiles.length) {
+      if (count === testCaseFiles.length) {
         resolve(result);
       }
     };
-    const asyncTask = (timeOutBar, testCaseFile, timeLimit) => {
-      let timeOut;
-      let runTimeDuration = 0;
-      const testCaseStream = fs.createReadStream(testCaseFile);
-      const childProcess = child.exec(`docker container exec -i ${containerName} ${command}${filename}`,
-        (error, stdout, stderr) => {
-          clearTimeout(timeOut);
-          testCaseStream.unpipe();
-          testCaseStream.destroy();
-          if (error) {
-            innerCb();
-            result[testCaseFile] = {
-              error: true,
-              timeout: false,
-              output: "Internal server error. Couldn't execute the program.",
-            };
-            return null;
-          }
-          runTimeDuration = (new Date()).getTime() - runTimeDuration;
-          if (stderr) {
-            innerCb();
-            result[testCaseFile] = {
-              error: true,
-              timeout: false,
-              output: stderr.trim(),
-            };
-            return null;
-          }
-          if (parseFloat(runTimeDuration / 1000)
-            > parseFloat(timeLimit) || childProcess.killed === true) {
-            innerCb();
-            result[testCaseFile] = {
-              error: true,
-              timeout: true,
-              output: `TLE ${runTimeDuration / 1000}s`,
-            };
-            return null;
-          }
-          innerCb();
-          result[testCaseFile] = { error: false, output: stdout.trim() };
-          return null;
-        });
-      testCaseStream.pipe(childProcess.stdin);
-      runTimeDuration = (new Date()).getTime();
-      timeOut = getStageFourTimeout(childProcess, timeOutBar, queue);
-    };
-    for (let idx = 0; idx < testcasefiles.length; idx += 1) {
-      const testCaseFile = testcasefiles[idx].file;
-      const timeOutBar = parseFloat(testcasefiles[idx].timeout) * 3000;
-      const timeLimit = testcasefiles[idx].timeout;
-      queue.queuePush(asyncTask.bind(this, timeOutBar, testCaseFile, timeLimit));
-    }
   });
+  const asyncTask = (timeOutBar, testCaseFile, timeLimit) => {
+    let timeOut;
+    let runTimeDuration = 0;
+    const testCaseStream = fs.createReadStream(testCaseFile);
+    const cb = (err, stdout, stderr) => {
+      clearTimeout(timeOut);
+      runTimeDuration = (new Date()).getTime() - runTimeDuration;
+      testCaseStream.unpipe();
+      testCaseStream.destroy();
+      if (err) {
+        innerCb();
+        result[testCaseFile] = {
+          error: true,
+          timeout: false,
+          output: "Internal server error. Couldn't execute the program.",
+        };
+        return null;
+      }
+      if (stderr) {
+        innerCb();
+        result[testCaseFile] = {
+          error: true,
+          timeout: false,
+          output: stderr.trim(),
+        };
+        return null;
+      }
+      if (parseFloat(runTimeDuration / 1000) > parseFloat(timeLimit)) {
+        innerCb();
+        result[testCaseFile] = {
+          error: true,
+          timeout: true,
+          output: `TLE ${runTimeDuration / 1000}s`,
+        };
+        return null;
+      }
+      innerCb();
+      result[testCaseFile] = { error: false, output: stdout.trim() };
+      return null;
+    };
+    const childProcess = child.exec(`
+      docker container exec -i ${containerName} ${command}${filename}
+    `, cb);
+    testCaseStream.pipe(childProcess.stdin);
+    runTimeDuration = (new Date()).getTime();
+    timeOut = getStageFourTimeout(childProcess, timeOutBar, queue);
+  };
+  for (let idx = 0; idx < testCaseFiles.length; idx += 1) {
+    const testCaseFile = testCaseFiles[idx].file;
+    const timeOutBar = parseFloat(testCaseFiles[idx].timeout) * 3000;
+    const timeLimit = testCaseFiles[idx].timeout;
+    queue.queuePush(asyncTask.bind(this, timeOutBar, testCaseFile, timeLimit));
+  }
+  return pinger();
 };
 
-module.exports = {
-  one,
-  two,
-  three,
-  four,
-};
+module.exports = { one, two, three, four };
