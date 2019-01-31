@@ -18,38 +18,46 @@ limitations under the License.
 
 const child = require('child_process');
 const fs = require('fs');
+const { promisify } = require('util');
 
 const ConcurrencyHandler = require('./concurrencyHandler.js');
 const { getStageFourTimeout, cpuDistribution } = require('./utils.js');
 
+const exec = promisify(child.exec);
 const queue = new ConcurrencyHandler();
 
 // Stage One : Check State Of Container
 
-const one = (image, lang) => {
+const one = async (image, lang) => {
   const containerName = `box-exec-${lang}`;
   const cpus = cpuDistribution[lang];
-  return new Promise((resolve, reject) => {
-    child.exec(`docker container inspect --format {{.State.Status}} ${containerName}`, (error, stdout, stderr) => {
-      if (stderr) {
-        child.exec(`docker container run --cpus ${cpus} -id --name ${containerName} ${image}`, (errorf, stdoutf, stderrf) => {
-          if (errorf || stderrf) {
-            reject();
-          }
-          resolve();
-        });
-      } else if (stdout !== 'running\n') {
-        child.exec(`docker container start ${containerName}`, (errorf, stdoutf, stderrf) => {
-          if (errorf || stderrf) {
-            reject();
-          }
-          resolve();
-        });
-      } else {
-        resolve();
+  try {
+    let output;
+    try {
+      output = await exec(`
+        docker container inspect --format {{.State.Status}} ${containerName}
+      `);
+    } catch (err) {
+      throw Error(`Container does not exist`);
+    }
+    if (output.stdout.trim() !== 'running') {
+      await exec(`
+        docker container start ${containerName}
+      `);
+    }
+  } catch (err) {
+    if (err.message === 'Container does not exist') {
+      try {
+        await exec(`
+          docker container run --cpus ${cpus} -id --name ${containerName} ${image}
+        `);
+      } catch (err) {
+          throw Error(`Error creating container ${containerName}`);
       }
-    });
-  });
+    } else {
+      throw Error(err);
+    }
+  }
 };
 
 // Stage Two : Copy Source Code File In The Container
