@@ -35,7 +35,7 @@ const handler = (emitter) => {
         .catch((error) => {
           e.error = true;
           e.errortext = error;
-          e.emit('error', error);
+          e.emit('error', error.message);
         });
       break;
 
@@ -50,7 +50,7 @@ const handler = (emitter) => {
         .catch((error) => {
           e.error = true;
           e.errortext = error;
-          e.emit('error', error);
+          e.emit('error', error.message);
         });
       break;
 
@@ -66,7 +66,7 @@ const handler = (emitter) => {
         .catch((error) => {
           e.error = true;
           e.errortext = error;
-          e.emit('error', error);
+          e.emit('error', error.message);
         });
       break;
 
@@ -82,7 +82,7 @@ const handler = (emitter) => {
         .catch((error) => {
           e.error = true;
           e.errortext = error;
-          e.emit('error', error);
+          e.emit('error', error.message);
         });
       break;
 
