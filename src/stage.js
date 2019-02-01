@@ -24,6 +24,7 @@ const ConcurrencyHandler = require('./concurrencyHandler.js');
 const { getStageFourTimeout, cpuDistribution } = require('./utils.js');
 
 const exec = promisify(child.exec);
+const queue = new ConcurrencyHandler();
 
 // Stage One : Check State Of Container
 
@@ -113,7 +114,6 @@ const four = (lang, cfile, testCaseFiles, command) => {
   let count = 0;
   let innerCb;
   const result = {};
-  const queue = new ConcurrencyHandler();
   const pinger = () => new Promise((resolve) => {
     innerCb = () => {
       queue.queueNext();
@@ -132,7 +132,7 @@ const four = (lang, cfile, testCaseFiles, command) => {
       runTimeDuration = (new Date()).getTime() - runTimeDuration;
       testCaseStream.unpipe();
       testCaseStream.destroy();
-      if (err) {
+      if (err && err.signal !== 'SIGINT') {
         innerCb();
         result[testCaseFile] = {
           error: true,
@@ -150,7 +150,8 @@ const four = (lang, cfile, testCaseFiles, command) => {
         };
         return null;
       }
-      if (parseFloat(runTimeDuration / 1000) > parseFloat(timeLimit)) {
+      if ((err && err.killed && err.signal === 'SIGINT')
+        || parseFloat(runTimeDuration / 1000) > parseFloat(timeLimit)) {
         innerCb();
         result[testCaseFile] = {
           error: true,

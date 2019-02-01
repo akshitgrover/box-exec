@@ -1,7 +1,7 @@
 // Queue Class
 
 class Queue {
-  constructor(limit = 25) {
+  constructor(limit = 1) {
     this.concurrencyLimit = limit;
     this.running = 0;
     this.tasks = [];
