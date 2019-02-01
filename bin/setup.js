@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
 
 Copyright 2018 Akshit Grover
@@ -19,70 +17,60 @@ limitations under the License.
 */
 
 const cp = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
-const imageObj = require('./../src/dockerimageLib.js');
-
-const args = process.argv.slice(2);
-const cpuDistribution = {
-  c: 1,
-  cpp: 1,
-  python2: 1,
-  python3: 1,
-};
-
-let lang = null;
-
-for (let idx = 0; idx < args.length; idx += 1) {
-  if (args[idx].startsWith('--') && args[idx].slice(2) in cpuDistribution) {
-    lang = args[idx].slice(2);
-  } else if (lang !== null) {
-    let flag;
-    try {
-      flag = parseFloat(args[idx]);
-      if (flag < 0 || Number.isNaN(flag)) {
-        throw new Error(`CPU should be > 0, Specified CPUS for ${lang} = ${args[idx]}`);
-      }
-    } catch (err) {
-      console.error(err);
-      break;
-    }
-    cpuDistribution[lang] = flag;
-  }
-}
-
-let count = 0;
+const imageObj = require('../src/dockerimageLib.js');
+const cpuDistribution = require('../config/.cpudist.json');
+const containers = require('../config/.containers.json');
 
 const startContainers = () => {
   Object.keys(cpuDistribution).forEach((l) => {
     const containerName = `box-exec-${l}`;
     const image = imageObj[l];
-    const cpus = cpuDistribution[l];
-
-    cp.exec(`docker container run -id --cpus ${cpus} --name ${containerName} ${image}`,
-      (error, stdout, stderr) => {
-        const stderrSplit = stderr.split(' ');
-        if (stderrSplit.indexOf('Conflict.') === -1 && stderr.length > 0) {
-          throw new Error(stderr);
-        }
-        console.log(`${containerName} container is running with CPUS = ${cpus}`);
+    const num = containers[l];
+    const cpus = (cpuDistribution[l] / num).toFixed(2);
+    for(let i = 0; i < num; i += 1) {
+      cp.exec(`
+        docker container run -id --cpus ${cpus} --name ${containerName}-${i} ${image}
+        `, (error, stdout, stderr) => {
+          const stderrSplit = stderr.split(' ');
+          if (stderrSplit.indexOf('Conflict.') === -1 && stderr.length > 0) {
+            throw new Error(stderr);
+          }
+          console.log(`${containerName}-${i} container is running with CPUS = ${cpus}`);
       });
-  });
-};
-
-const cb = () => {
-  count += 1;
-  if (count === 4) {
-    startContainers();
-  }
-};
-
-Object.keys(cpuDistribution).forEach((l) => {
-  const containerName = `box-exec-${l}`;
-  cp.exec(`docker container rm ${containerName} --force`, (error, stdout, stderr) => {
-    if (!stderr.match(/No such container/) && stderr.length > 0) {
-      console.log(stderr);
-      throw new Error(stderr);
     }
-    cb();
   });
-});
+};
+
+module.exports = () => {
+  cp.exec('docker container ls -aq', (err, stdout, stderr) => {
+    if (err || stderr) {
+      console.error((err) ? err.message:stderr.message);
+      process.exit(1);
+    }
+    stdout = stdout.trim();
+    if(stdout === '') {
+      startContainers();
+      return;
+    }
+    let count = 0;
+    const containerIDs = stdout.split('\n');
+    const cb = () => {
+      count += 1;
+      if (count === containerIDs.length) {
+        startContainers();
+      }
+    }
+    containerIDs.forEach((id) => {
+      cp.exec(`docker container rm ${id} --force`, (err, stdout, stderr) => {
+        if(err || stderr) {
+          console.error((err)? err.message:stderr.message);
+          process.exit(1);
+        }
+        cb();
+      });
+    });
+  });
+}
