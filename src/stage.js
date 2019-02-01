@@ -180,4 +180,6 @@ const four = (lang, cfile, testCaseFiles, command) => {
   return pinger();
 };
 
-module.exports = { one, two, three, four };
+module.exports = {
+  one, two, three, four,
+};

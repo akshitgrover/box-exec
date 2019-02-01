@@ -20,25 +20,25 @@ const fs = require('fs');
 const path = require('path');
 
 const cpuDistribution = {
-  'c': 1,
-  'cpp': 1,
-  'python2': 1,
-  'python3': 1,
+  c: 1,
+  cpp: 1,
+  python2: 1,
+  python3: 1,
 };
 const containers = {
-  'c': 1,
-  'cpp': 1,
-  'python2': 1,
-  'python3': 1,
+  c: 1,
+  cpp: 1,
+  python2: 1,
+  python3: 1,
 };
 
 module.exports = () => {
   fs.writeFileSync(
-      path.join(__dirname, '../config/.cpudist.json'),
-      JSON.stringify(cpuDistribution),
+    path.join(__dirname, '../config/.cpudist.json'),
+    JSON.stringify(cpuDistribution),
   );
   fs.writeFileSync(
-      path.join(__dirname, '../config/.containers.json'),
-      JSON.stringify(containers),
+    path.join(__dirname, '../config/.containers.json'),
+    JSON.stringify(containers),
   );
-}
+};

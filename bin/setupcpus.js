@@ -18,19 +18,21 @@ limitations under the License.
 
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 const config = require('../config/.cpudist.json');
-const physicalCPUs = require('os').cpus().length;
+
+const physicalCPUs = os.cpus().length;
 const setup = (args) => {
   let lang = null;
   for (let i = 0; i < args.length; i += 1) {
-    if (args[i].startsWith('--') && args[i].slice(2,) in config) {
-      lang = args[i].slice(2,);
-    } else if(lang !== null) {
+    if (args[i].startsWith('--') && args[i].slice(2) in config) {
+      lang = args[i].slice(2);
+    } else if (lang !== null) {
       let flag;
       try {
         flag = parseFloat(args[i]);
-        if(flag < 0 || flag > physicalCPUs || Number.isNaN(flag)) {
+        if (flag < 0 || flag > physicalCPUs || Number.isNaN(flag)) {
           throw Error(`
             Error: CPUs should be > 0  && < ${physicalCPUs}, Given: ${flag} | ${lang}
           `.trim());
@@ -45,10 +47,10 @@ const setup = (args) => {
   fs.writeFileSync(
     path.join(__dirname, '../config/.cpudist.json'),
     JSON.stringify(config),
-  )
+  );
   console.log('Successful configuration');
-}
+};
 
 module.exports = (args) => {
   setup(args);
-}
+};

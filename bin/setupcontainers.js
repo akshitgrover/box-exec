@@ -20,16 +20,17 @@ const path = require('path');
 const fs = require('fs');
 
 const config = require('../config/.containers.json');
+
 const setup = (args) => {
   let lang = null;
   for (let i = 0; i < args.length; i += 1) {
-    if (args[i].startsWith('--') && args[i].slice(2,) in config) {
-      lang = args[i].slice(2,);
-    } else if(lang !== null) {
+    if (args[i].startsWith('--') && args[i].slice(2) in config) {
+      lang = args[i].slice(2);
+    } else if (lang !== null) {
       let flag;
       try {
-        flag = parseInt(args[i]);
-        if(flag < 0 || Number.isNaN(flag)) {
+        flag = parseInt(args[i], 10);
+        if (flag < 0 || Number.isNaN(flag)) {
           throw Error(`
             Number of containers should be a whole number, Given: ${flag}
           `.trim());
@@ -46,8 +47,8 @@ const setup = (args) => {
     JSON.stringify(config),
   );
   console.log('Successful configuration');
-}
+};
 
 module.exports = (args) => {
   setup(args);
-}
+};

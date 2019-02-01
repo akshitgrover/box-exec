@@ -23,17 +23,17 @@ const setContainers = require('./setupcontainers.js');
 const setCPUs = require('./setupcpus.js');
 const reset = require('./reset.js');
 
-const args = process.argv.slice(2,);
+const args = process.argv.slice(2);
 
-switch(args[0].trim()) {
+switch (args[0].trim()) {
   case 'setup':
     setup();
     break;
   case 'set':
     if (args[1].trim() === 'containers') {
-      setContainers(args.slice(2,));
-    } else if(args[1].trim() === 'cpus') {
-      setCPUs(args.slice(2,));
+      setContainers(args.slice(2));
+    } else if (args[1].trim() === 'cpus') {
+      setCPUs(args.slice(2));
     }
     break;
   case 'reset':

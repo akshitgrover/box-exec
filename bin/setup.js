@@ -17,8 +17,6 @@ limitations under the License.
 */
 
 const cp = require('child_process');
-const fs = require('fs');
-const path = require('path');
 
 const imageObj = require('../src/dockerimageLib.js');
 const cpuDistribution = require('../config/.cpudist.json');
@@ -30,15 +28,15 @@ const startContainers = () => {
     const image = imageObj[l];
     const num = containers[l];
     const cpus = (cpuDistribution[l] / num).toFixed(2);
-    for(let i = 0; i < num; i += 1) {
+    for (let i = 0; i < num; i += 1) {
       cp.exec(`
         docker container run -id --cpus ${cpus} --name ${containerName}-${i} ${image}
         `, (error, stdout, stderr) => {
-          const stderrSplit = stderr.split(' ');
-          if (stderrSplit.indexOf('Conflict.') === -1 && stderr.length > 0) {
-            throw new Error(stderr);
-          }
-          console.log(`${containerName}-${i} container is running with CPUS = ${cpus}`);
+        const stderrSplit = stderr.split(' ');
+        if (stderrSplit.indexOf('Conflict.') === -1 && stderr.length > 0) {
+          throw new Error(stderr);
+        }
+        console.log(`${containerName}-${i} container is running with CPUS = ${cpus}`);
       });
     }
   });
@@ -47,30 +45,30 @@ const startContainers = () => {
 module.exports = () => {
   cp.exec('docker container ls -aq', (err, stdout, stderr) => {
     if (err || stderr) {
-      console.error((err) ? err.message:stderr.message);
+      console.error((err) ? err.message : stderr.message);
       process.exit(1);
     }
-    stdout = stdout.trim();
-    if(stdout === '') {
+    const sout = stdout.trim();
+    if (sout === '') {
       startContainers();
       return;
     }
     let count = 0;
-    const containerIDs = stdout.split('\n');
+    const containerIDs = sout.split('\n');
     const cb = () => {
       count += 1;
       if (count === containerIDs.length) {
         startContainers();
       }
-    }
+    };
     containerIDs.forEach((id) => {
-      cp.exec(`docker container rm ${id} --force`, (err, stdout, stderr) => {
-        if(err || stderr) {
-          console.error((err)? err.message:stderr.message);
+      cp.exec(`docker container rm ${id} --force`, (e, _, serr) => {
+        if (e || serr) {
+          console.error((e) ? e.message : serr.message);
           process.exit(1);
         }
         cb();
       });
     });
   });
-}
+};
