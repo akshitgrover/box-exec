@@ -36,7 +36,7 @@ const setup = (args) => {
           `.trim());
         }
       } catch (err) {
-        console.error(err);
+        process.stderr.write(err.message + '\n');
         break;
       }
       config[lang] = flag;
@@ -46,7 +46,7 @@ const setup = (args) => {
     path.join(__dirname, '../config/.containers.json'),
     JSON.stringify(config),
   );
-  console.log('Successful configuration');
+  process.stdout.write('Successfully configured\n');
 };
 
 module.exports = (args) => {

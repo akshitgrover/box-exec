@@ -41,4 +41,5 @@ module.exports = () => {
     path.join(__dirname, '../config/.containers.json'),
     JSON.stringify(containers),
   );
+  process.stdout.write('Configuration reset successful\n');
 };

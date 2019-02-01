@@ -22,6 +22,7 @@ const setup = require('./setup.js');
 const setContainers = require('./setupcontainers.js');
 const setCPUs = require('./setupcpus.js');
 const reset = require('./reset.js');
+const configure = require('./configure.js');
 
 const args = process.argv.slice(2);
 
@@ -39,7 +40,10 @@ switch (args[0].trim()) {
   case 'reset':
     reset();
     break;
+  case 'configure':
+    configure();
+    break;
   default:
-    console.error(`Error: Invalid command ${args[0]}`);
+    process.stderr.write(`Error: Invalid command '${args[0]}'\n`);
     break;
 }

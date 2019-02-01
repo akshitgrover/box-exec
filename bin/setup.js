@@ -36,7 +36,7 @@ const startContainers = () => {
         if (stderrSplit.indexOf('Conflict.') === -1 && stderr.length > 0) {
           throw new Error(stderr);
         }
-        console.log(`${containerName}-${i} container is running with CPUS = ${cpus}`);
+        process.stdout.write(`${containerName}-${i} container is running with CPUS = ${cpus}\n`);
       });
     }
   });
@@ -45,7 +45,7 @@ const startContainers = () => {
 module.exports = () => {
   cp.exec('docker container ls -aq', (err, stdout, stderr) => {
     if (err || stderr) {
-      console.error((err) ? err.message : stderr.message);
+      process.stderr.write((err) ? err.message + '\n' : stderr.message + '\n');
       process.exit(1);
     }
     const sout = stdout.trim();
@@ -64,7 +64,7 @@ module.exports = () => {
     containerIDs.forEach((id) => {
       cp.exec(`docker container rm ${id} --force`, (e, _, serr) => {
         if (e || serr) {
-          console.error((e) ? e.message : serr.message);
+          process.stderr((e) ? e.message + '\n' : serr.message + '\n');
           process.exit(1);
         }
         cb();
