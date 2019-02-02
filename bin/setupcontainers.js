@@ -36,7 +36,7 @@ const setup = (args) => {
           `.trim());
         }
       } catch (err) {
-        process.stderr.write(err.message + '\n');
+        process.stderr.write(`${err.message}\n`);
         break;
       }
       config[lang] = flag;

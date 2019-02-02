@@ -45,7 +45,7 @@ const startContainers = () => {
 module.exports = () => {
   cp.exec('docker container ls -aq', (err, stdout, stderr) => {
     if (err || stderr) {
-      process.stderr.write((err) ? err.message + '\n' : stderr.message + '\n');
+      process.stderr.write((err) ? `${err.message}\n` : `${stderr.message}\n`);
       process.exit(1);
     }
     const sout = stdout.trim();
@@ -64,7 +64,7 @@ module.exports = () => {
     containerIDs.forEach((id) => {
       cp.exec(`docker container rm ${id} --force`, (e, _, serr) => {
         if (e || serr) {
-          process.stderr((e) ? e.message + '\n' : serr.message + '\n');
+          process.stderr((e) ? `${e.message}\n` : `${serr.message}\n`);
           process.exit(1);
         }
         cb();

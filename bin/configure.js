@@ -42,4 +42,4 @@ module.exports = () => {
     JSON.stringify(containers),
   );
   process.stdout.write('Successfully configured\n');
-}
+};
