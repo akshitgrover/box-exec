@@ -30,10 +30,6 @@ const setup = () => {
   });
   try {
     fs.writeFileSync(
-      path.join(__dirname, './config/.schedulings.json'),
-      JSON.stringify(availableSpots),
-    );
-    fs.writeFileSync(
       path.join(__dirname, './config/.lastscheduling.json'),
       JSON.stringify(lastScheduledOn),
     );
