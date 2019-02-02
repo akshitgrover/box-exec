@@ -106,7 +106,6 @@ const three = async (lang, cfile) => {
 
 const four = (lang, cfile, testCaseFiles, command) => {
   let codefile = cfile;
-  const containerName = getContainer(lang, 4);
   codefile = codefile.replace(/\\/g, '/');
   codefile = codefile.split('/');
   let filename = codefile[codefile.length - 1];
@@ -125,7 +124,7 @@ const four = (lang, cfile, testCaseFiles, command) => {
       }
     };
   });
-  const asyncTask = (timeOutBar, testCaseFile, timeLimit) => {
+  const asyncTask = (timeOutBar, testCaseFile, timeLimit, containerName) => {
     let timeOut;
     let runTimeDuration = 0;
     const testCaseStream = fs.createReadStream(testCaseFile);
@@ -174,10 +173,11 @@ const four = (lang, cfile, testCaseFiles, command) => {
     timeOut = getStageFourTimeout(childProcess, timeOutBar, queue);
   };
   for (let idx = 0; idx < testCaseFiles.length; idx += 1) {
+    const containerName = getContainer(lang, 4);
     const testCaseFile = testCaseFiles[idx].file;
     const timeOutBar = parseFloat(testCaseFiles[idx].timeout) * 3000;
     const timeLimit = testCaseFiles[idx].timeout;
-    scheduler.schedule(asyncTask.bind(this, timeOutBar, testCaseFile, timeLimit), lang);
+    scheduler.schedule(asyncTask.bind(this, timeOutBar, testCaseFile, timeLimit, containerName), lang);
   }
   return pinger();
 };
