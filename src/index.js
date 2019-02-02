@@ -74,7 +74,9 @@ const getEmitter = () => {
     emitter.emit('success');
   };
   emitter.execute = () => {
-    balancer.setup();
+    if (!balancer.status()) {
+      balancer.setup();
+    }
     handler(emitter);
   };
   return emitter;

@@ -19,11 +19,18 @@ limitations under the License.
 const fs = require('fs');
 const path = require('path');
 
+let setupFlag = false;
 const availableSpots = {};
 const lastScheduledOn = {};
 
 const setup = () => {
-  const containers = require('../../config/.containers.json');
+  let containers;
+  try {
+    containers = fs.readFileSync(path.join(__dirname, '../../config/.containers.json'));
+    containers = JSON.parse(containers);
+  } catch (err) {
+    return err.message;
+  }
   Object.keys(containers).forEach((lang) => {
     availableSpots[lang] = containers[lang];
     lastScheduledOn[lang] = 0;
@@ -36,8 +43,9 @@ const setup = () => {
   } catch (err) {
     return err.message;
   }
+  setupFlag = true;
   return null;
-}
+};
 
 const getContainer = (lang, stage) => {
   const toBeScheduledOn = (lastScheduledOn[lang] + 1) % availableSpots[lang];
@@ -45,8 +53,10 @@ const getContainer = (lang, stage) => {
     lastScheduledOn[lang] += (lastScheduledOn[lang] + 1) % availableSpots[lang];
   }
   return `box-exec-${lang}-${toBeScheduledOn}`;
-}
+};
+
+const status = () => setupFlag;
 
 module.exports = {
-  setup, getContainer,
-}
+  setup, getContainer, status,
+};
