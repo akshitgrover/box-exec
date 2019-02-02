@@ -67,3 +67,18 @@ it('Should Compile/Execute python2 Code', (done) => {
   });
   boxExec.setData('7', path.join(`${__dirname}/test_code.py`), [{ file: path.join(`${__dirname}/case.txt`), timeout: 2 }, { file: path.join(`${__dirname}/case.txt`), timeout: 2 }]);
 });
+
+it('Should Compile/Execute java8 code', (done) => {
+  const boxExec = index();
+  boxExec.on('output', () => {
+    expect(boxExec.output[path.join(`${__dirname}/case.txt`)].output).toBe('7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n7\n9\n11\n16\n18\n25\n72');
+    done();
+  });
+  boxExec.on('error', () => {
+    done(boxExec.errortext);
+  });
+  boxExec.on('success', () => {
+    boxExec.execute();
+  });
+  boxExec.setData('25', path.join(`${__dirname}/test_code.java`), [{ file: path.join(`${__dirname}/case.txt`), timeout: 2 }, { file: path.join(`${__dirname}/case.txt`), timeout: 2 }]);
+});
