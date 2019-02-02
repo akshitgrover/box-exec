@@ -22,6 +22,8 @@ const { promisify } = require('util');
 
 const ConcurrencyHandler = require('./concurrencyHandler.js');
 const { getStageFourTimeout, cpuDistribution } = require('./utils.js');
+const { getContainer } = require('./loadbalancer/balancer.js');
+const scheduler = require('./loadbalancer/scheduler.js');
 
 const exec = promisify(child.exec);
 const queue = new ConcurrencyHandler();
@@ -29,7 +31,7 @@ const queue = new ConcurrencyHandler();
 // Stage One : Check State Of Container
 
 const one = async (image, lang) => {
-  const containerName = `box-exec-${lang}`;
+  const containerName = getContainer(lang);
   const cpus = cpuDistribution[lang];
   try {
     let output;
@@ -66,7 +68,7 @@ const one = async (image, lang) => {
 // Stage Two : Copy Source Code File In The Container
 
 const two = async (lang, codefile) => {
-  const containerName = `box-exec-${lang}`;
+  const containerName = getContainer(lang);
   try {
     await exec(`docker cp ${codefile} ${containerName}:/`);
   } catch (err) {
@@ -84,7 +86,7 @@ const three = async (lang, cfile) => {
   let codefile = cfile;
   codefile = codefile.replace(/\\/g, '/');
   codefile = codefile.split('/');
-  const containerName = `box-exec-${lang}`;
+  const containerName = getContainer(lang);
   const fileName = codefile[codefile.length - 1];
   const rawName = `${fileName.slice(0, fileName.indexOf('.'))}.out`;
   try {
@@ -104,7 +106,7 @@ const three = async (lang, cfile) => {
 
 const four = (lang, cfile, testCaseFiles, command) => {
   let codefile = cfile;
-  const containerName = `box-exec-${lang}`;
+  const containerName = getContainer(lang, 4);
   codefile = codefile.replace(/\\/g, '/');
   codefile = codefile.split('/');
   let filename = codefile[codefile.length - 1];
@@ -115,8 +117,8 @@ const four = (lang, cfile, testCaseFiles, command) => {
   let innerCb;
   const result = {};
   const pinger = () => new Promise((resolve) => {
-    innerCb = () => {
-      queue.queueNext();
+    innerCb = (lang) => {
+      scheduler.next(lang);
       count += 1;
       if (count === testCaseFiles.length) {
         resolve(result);
@@ -133,7 +135,7 @@ const four = (lang, cfile, testCaseFiles, command) => {
       testCaseStream.unpipe();
       testCaseStream.destroy();
       if (err && err.signal !== 'SIGINT') {
-        innerCb();
+        innerCb(lang);
         result[testCaseFile] = {
           error: true,
           timeout: false,
@@ -142,7 +144,7 @@ const four = (lang, cfile, testCaseFiles, command) => {
         return null;
       }
       if (stderr) {
-        innerCb();
+        innerCb(lang);
         result[testCaseFile] = {
           error: true,
           timeout: false,
@@ -152,7 +154,7 @@ const four = (lang, cfile, testCaseFiles, command) => {
       }
       if ((err && err.killed && err.signal === 'SIGINT')
         || parseFloat(runTimeDuration / 1000) > parseFloat(timeLimit)) {
-        innerCb();
+        innerCb(lang);
         result[testCaseFile] = {
           error: true,
           timeout: true,
@@ -160,7 +162,7 @@ const four = (lang, cfile, testCaseFiles, command) => {
         };
         return null;
       }
-      innerCb();
+      innerCb(lang);
       result[testCaseFile] = { error: false, output: stdout.trim() };
       return null;
     };
@@ -175,7 +177,7 @@ const four = (lang, cfile, testCaseFiles, command) => {
     const testCaseFile = testCaseFiles[idx].file;
     const timeOutBar = parseFloat(testCaseFiles[idx].timeout) * 3000;
     const timeLimit = testCaseFiles[idx].timeout;
-    queue.queuePush(asyncTask.bind(this, timeOutBar, testCaseFile, timeLimit));
+    scheduler.schedule(asyncTask.bind(this, timeOutBar, testCaseFile, timeLimit), lang);
   }
   return pinger();
 };

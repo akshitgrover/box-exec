@@ -21,6 +21,7 @@ const fs = require('fs');
 
 const handler = require('./processHandler.js');
 const { setCPUDistribution } = require('./utils.js');
+const balancer = require('./loadbalancer/balancer.js');
 
 class ExecEmitter extends EventEmitter {
   constructor() {
@@ -73,6 +74,7 @@ const getEmitter = () => {
     emitter.emit('success');
   };
   emitter.execute = () => {
+    balancer.setup();
     handler(emitter);
   };
   return emitter;
