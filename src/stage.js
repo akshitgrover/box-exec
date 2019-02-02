@@ -24,6 +24,7 @@ const ConcurrencyHandler = require('./concurrencyHandler.js');
 const { getStageFourTimeout, cpuDistribution } = require('./utils.js');
 const { getContainer } = require('./loadbalancer/balancer.js');
 const scheduler = require('./loadbalancer/scheduler.js');
+const compileCommands = require('./compileCommands.js');
 
 const exec = promisify(child.exec);
 const queue = new ConcurrencyHandler();
@@ -47,12 +48,14 @@ const one = async (image, lang) => {
         docker container start ${containerName}
       `);
     }
+    return containerName;
   } catch (err) {
     if (err.message === 'Container does not exist') {
       try {
         await exec(`
           docker container run --cpus ${cpus} -id --name ${containerName} ${image}
         `);
+        return containerName;
       } catch (error) {
         throw new Error(`Error creating container ${containerName}`);
       }
@@ -67,10 +70,10 @@ const one = async (image, lang) => {
 
 // Stage Two : Copy Source Code File In The Container
 
-const two = async (lang, codefile) => {
-  const containerName = getContainer(lang);
+const two = async (lang, cFile, containerName) => {
+  const codeFile = cFile;
   try {
-    await exec(`docker cp ${codefile} ${containerName}:/`);
+    await exec(`docker cp ${codeFile} ${containerName}:/`);
   } catch (err) {
     if (err.stderr) {
       throw new Error(err.stderr);
@@ -82,17 +85,18 @@ const two = async (lang, codefile) => {
 
 // Stage Three: Compile Source Code File (only for c/c++)
 
-const three = async (lang, cfile) => {
+const three = async (lang, cfile, containerName) => {
   let codefile = cfile;
   codefile = codefile.replace(/\\/g, '/');
   codefile = codefile.split('/');
-  const containerName = getContainer(lang);
   const fileName = codefile[codefile.length - 1];
-  const rawName = `${fileName.slice(0, fileName.indexOf('.'))}.out`;
+  let rawName = null;
+  if (lang === 'c' || lang === 'cpp') {
+    rawName = `${fileName.slice(0, fileName.indexOf('.'))}.out`;
+  }
+  const compileCommand = compileCommands[lang](containerName, fileName, rawName);
   try {
-    await exec(`
-      docker container exec ${containerName} g++ -o ${rawName} ${fileName}
-    `);
+    await exec(compileCommand);
   } catch (err) {
     if (err.stderr) {
       throw new Error(err.stderr);
@@ -104,7 +108,7 @@ const three = async (lang, cfile) => {
 
 // Stage Four: Execute Source Code
 
-const four = (lang, cfile, testCaseFiles, command) => {
+const four = (lang, cfile, testCaseFiles, command, containerName) => {
   let codefile = cfile;
   codefile = codefile.replace(/\\/g, '/');
   codefile = codefile.split('/');
@@ -116,15 +120,15 @@ const four = (lang, cfile, testCaseFiles, command) => {
   let innerCb;
   const result = {};
   const pinger = () => new Promise((resolve) => {
-    innerCb = (lang) => {
-      scheduler.next(lang);
+    innerCb = (l) => {
+      scheduler.next(l);
       count += 1;
       if (count === testCaseFiles.length) {
         resolve(result);
       }
     };
   });
-  const asyncTask = (timeOutBar, testCaseFile, timeLimit, containerName) => {
+  const asyncTask = (timeOutBar, testCaseFile, timeLimit) => {
     let timeOut;
     let runTimeDuration = 0;
     const testCaseStream = fs.createReadStream(testCaseFile);
@@ -173,11 +177,10 @@ const four = (lang, cfile, testCaseFiles, command) => {
     timeOut = getStageFourTimeout(childProcess, timeOutBar, queue);
   };
   for (let idx = 0; idx < testCaseFiles.length; idx += 1) {
-    const containerName = getContainer(lang, 4);
     const testCaseFile = testCaseFiles[idx].file;
     const timeOutBar = parseFloat(testCaseFiles[idx].timeout) * 3000;
     const timeLimit = testCaseFiles[idx].timeout;
-    scheduler.schedule(asyncTask.bind(this, timeOutBar, testCaseFile, timeLimit, containerName), lang);
+    scheduler.schedule(asyncTask.bind(this, timeOutBar, testCaseFile, timeLimit), lang);
   }
   return pinger();
 };

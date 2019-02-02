@@ -22,12 +22,21 @@ const execCommands = require('./execCommands.js');
 
 const handler = (emitter) => {
   const e = emitter;
-
+  let containerName;
   switch (e.language) {
     case 'python2':
       stage.one(dockerImage.python2, 'python2')
-        .then(() => stage.two('python2', e.codefile))
-        .then(() => stage.four('python2', e.codefile, e.testcasefiles, execCommands.python2))
+        .then((cntName) => {
+          containerName = cntName;
+          return stage.two('python2', e.codefile, containerName);
+        })
+        .then(() => stage.four(
+          'python2',
+          e.codefile,
+          e.testcasefiles,
+          execCommands.python2,
+          containerName,
+        ))
         .then((data) => {
           e.output = data;
           e.emit('output', data);
@@ -41,8 +50,17 @@ const handler = (emitter) => {
 
     case 'python3':
       stage.one(dockerImage.python3, 'python3')
-        .then(() => stage.two('python3', e.codefile))
-        .then(() => stage.four('python3', e.codefile, e.testcasefiles, execCommands.python3))
+        .then((cntName) => {
+          containerName = cntName;
+          return stage.two('python3', e.codefile, containerName);
+        })
+        .then(() => stage.four(
+          'python3',
+          e.codefile,
+          e.testcasefiles,
+          execCommands.python3,
+          containerName,
+        ))
         .then((data) => {
           e.output = data;
           e.emit('output', data);
@@ -56,9 +74,22 @@ const handler = (emitter) => {
 
     case 'c':
       stage.one(dockerImage.c, 'c')
-        .then(() => stage.two('c', e.codefile))
-        .then(() => stage.three('c', e.codefile))
-        .then(() => stage.four('c', e.codefile, e.testcasefiles, execCommands.c))
+        .then((cntName) => {
+          containerName = cntName;
+          return stage.two('c', e.codefile, containerName);
+        })
+        .then(() => stage.three(
+          'c',
+          e.codefile,
+          containerName,
+        ))
+        .then(() => stage.four(
+          'c',
+          e.codefile,
+          e.testcasefiles,
+          execCommands.c,
+          containerName,
+        ))
         .then((data) => {
           e.output = data;
           e.emit('output', data);
@@ -72,9 +103,18 @@ const handler = (emitter) => {
 
     case 'cpp':
       stage.one(dockerImage.cpp, 'cpp')
-        .then(() => stage.two('cpp', e.codefile))
-        .then(() => stage.three('cpp', e.codefile))
-        .then(() => stage.four('cpp', e.codefile, e.testcasefiles, execCommands.cpp))
+        .then((cntName) => {
+          containerName = cntName;
+          return stage.two('cpp', e.codefile, containerName);
+        })
+        .then(() => stage.three('cpp', e.codefile, containerName))
+        .then(() => stage.four(
+          'cpp',
+          e.codefile,
+          e.testcasefiles,
+          execCommands.cpp,
+          containerName,
+        ))
         .then((data) => {
           e.output = data;
           e.emit('output', data);
