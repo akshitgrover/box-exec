@@ -20,8 +20,9 @@ const child = require('child_process');
 const fs = require('fs');
 const { promisify } = require('util');
 
+const cpuDistribution = require('../config/.cpudist.json');
 const ConcurrencyHandler = require('./concurrencyHandler.js');
-const { getStageFourTimeout, cpuDistribution } = require('./utils.js');
+const { getStageFourTimeout } = require('./utils.js');
 const { getContainer } = require('./loadbalancer/balancer.js');
 const scheduler = require('./loadbalancer/scheduler.js');
 const compileCommands = require('./compileCommands.js');
@@ -70,10 +71,15 @@ const one = async (image, lang) => {
 
 // Stage Two : Copy Source Code File In The Container
 
-const two = async (lang, cFile, containerName) => {
-  const codeFile = cFile;
+const two = async (lang, codeFile, containerName) => {
+  let output;
+  if (lang === 'java8') {
+    output = '/main.java';
+  } else {
+    output = '/';
+  }
   try {
-    await exec(`docker cp ${codeFile} ${containerName}:/`);
+    await exec(`docker cp ${codeFile} ${containerName}:${output}`);
   } catch (err) {
     if (err.stderr) {
       throw new Error(err.stderr);
@@ -113,7 +119,9 @@ const four = (lang, cfile, testCaseFiles, command, containerName) => {
   codefile = codefile.replace(/\\/g, '/');
   codefile = codefile.split('/');
   let filename = codefile[codefile.length - 1];
-  if (lang === 'c' || lang === 'cpp') {
+  if (lang === 'java8') {
+    filename = 'main';
+  } else if (lang === 'c' || lang === 'cpp') {
     filename = `${filename.slice(0, filename.indexOf('.'))}.out`;
   }
   let count = 0;

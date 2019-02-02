@@ -16,13 +16,6 @@ limitations under the License.
 
 */
 
-const cpuDistribution = {
-  c: 1,
-  cpp: 1,
-  python2: 1,
-  python3: 1,
-};
-
 module.exports = {
   getStageFourTimeout(cp, timeOut, queue) {
     return setTimeout(() => {
@@ -30,5 +23,4 @@ module.exports = {
       queue.queueNext();
     }, timeOut);
   },
-  cpuDistribution,
 };

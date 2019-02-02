@@ -23,6 +23,7 @@ const queueDirectory = {
   cpp: new Queue(),
   python2: new Queue(),
   python3: new Queue(),
+  java8: new Queue(),
 };
 
 const schedule = (task, lang) => {

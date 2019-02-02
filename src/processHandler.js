@@ -126,6 +126,31 @@ const handler = (emitter) => {
         });
       break;
 
+    case 'java8':
+      stage.one(dockerImage.java8, 'java8')
+        .then((cntName) => {
+          containerName = cntName;
+          return stage.two('java8', e.codefile, containerName);
+        })
+        .then(() => stage.three('java8', e.codefile, containerName))
+        .then(() => stage.four(
+          'java8',
+          e.codefile,
+          e.testcasefiles,
+          execCommands.java8,
+          containerName,
+        ))
+        .then((data) => {
+          e.output = data;
+          e.emit('output', data);
+        })
+        .catch((error) => {
+          e.error = true;
+          e.errortext = error;
+          e.emit('error', error.message);
+        });
+      break;
+
     default: // empty
   }
 };
