@@ -13,15 +13,14 @@ node_js:
   - "8"
 
 install:
-  - npm i mocha
-  - npm i expect
+  - npm install
+  - npm link
 
 script:
   - docker image pull akshitgrover/c-alpine
-  - docker container run -id --name box-exec-c akshitgrover/c-alpine
-  - docker container run -id --name box-exec-cpp akshitgrover/c-alpine
   - docker image pull akshitgrover/python2-alpine
-  - docker container run -id  --name box-exec-python2 akshitgrover/python2-alpine
   - docker image pull akshitgrover/python3-alpine
-  - docker container run -id --name box-exec-python3 akshitgrover/python3-alpine
+  - docker image pull akshitgrover/java8-alpine
+  - boxexec configure
+  - boxexec setup
   - npm run test
