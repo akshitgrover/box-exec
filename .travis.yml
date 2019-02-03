@@ -17,6 +17,7 @@ install:
   - npm link
 
 script:
+  - npm run lint
   - docker image pull akshitgrover/c-alpine
   - docker image pull akshitgrover/python2-alpine
   - docker image pull akshitgrover/python3-alpine
