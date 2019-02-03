@@ -4,7 +4,11 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha --timeout 11000 tests/script.js"
+    "test": "mocha --timeout 11000 tests/script.js",
+    "api-build": "./node_modules/.bin/tsc --build api/tsconfig.json --force",
+    "api-lift": "node api/build/server.js",
+    "api-lint": "./node_modules/.bin/eslint ./api/**.ts",
+    "lint": "./node_modules/.bin/eslint ."
   },
   "repository": {
     "type": "git",
@@ -30,10 +34,23 @@
   },
   "homepage": "https://github.com/akshitgrover/box-exec#readme",
   "devDependencies": {
+    "@types/express": "^4.16.1",
     "eslint": "^5.12.1",
     "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.0.0",
+    "eslint-config-typescript": "^1.1.0",
     "eslint-plugin-import": "^2.15.0",
+    "eslint-plugin-prettier": "^3.0.1",
+    "eslint-plugin-react": "^7.12.4",
+    "eslint-plugin-typescript": "^0.14.0",
     "expect": "^22.4.3",
-    "mocha": "^5.1.1"
+    "mocha": "^5.1.1",
+    "prettier": "^1.16.4",
+    "typescript": "^3.2.1",
+    "typescript-eslint-parser": "^22.0.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4"
   }
 }

@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "module": "CommonJs",
+        "moduleResolution": "Node",
+        "outDir": "build",
+        "strictNullChecks": true,
+        "target": "ES5"
+    }
+}
