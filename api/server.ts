@@ -1,9 +1,9 @@
-import * as express from 'express';
+import * as Express from 'express';
 import * as bodyParser from 'body-parser';
 
 import env from './env';
 
-const app = express();
+const app = Express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
