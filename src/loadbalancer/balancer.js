@@ -19,6 +19,8 @@ limitations under the License.
 const fs = require('fs');
 const path = require('path');
 
+const { setupQueueDirectory } = require('./scheduler.js');
+
 let setupFlag = false;
 const availableSpots = {};
 const lastScheduledOn = {};
@@ -38,12 +40,13 @@ const setup = () => {
   try {
     fs.writeFileSync(
       path.join(__dirname, './config/.lastscheduling.json'),
-      JSON.stringify(lastScheduledOn),
+      `${JSON.stringify(lastScheduledOn)}\n`,
     );
   } catch (err) {
     return err.message;
   }
   setupFlag = true;
+  setupQueueDirectory(containers);
   return null;
 };
 

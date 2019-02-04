@@ -18,24 +18,29 @@ limitations under the License.
 
 const Queue = require('../concurrencyHandler.js');
 
-const queueDirectory = {
-  c: new Queue(),
-  cpp: new Queue(),
-  python2: new Queue(),
-  python3: new Queue(),
-  java8: new Queue(),
-};
+const queueDirectory = new Map();
 
-const schedule = (task, lang) => {
-  const queue = queueDirectory[lang];
+const schedule = (task, containerName) => {
+  const queue = queueDirectory.get(containerName);
   queue.queuePush(task);
 };
 
-const next = (lang) => {
-  const queue = queueDirectory[lang];
+const next = (containerName) => {
+  const queue = queueDirectory.get(containerName);
   queue.queueNext();
 };
 
+const setupQueueDirectory = (containers) => {
+  queueDirectory.clear();
+  Object.keys(containers).forEach((lang) => {
+    const containerNum = containers[lang];
+    for (let i = 0; i < containerNum; i += 1) {
+      const containerName = `box-exec-${lang}-${i}`;
+      queueDirectory.set(containerName, new Queue());
+    }
+  });
+};
+
 module.exports = {
-  schedule, next,
+  schedule, next, setupQueueDirectory,
 };

@@ -128,8 +128,8 @@ const four = (lang, cfile, testCaseFiles, command, containerName) => {
   let innerCb;
   const result = {};
   const pinger = () => new Promise((resolve) => {
-    innerCb = (l) => {
-      scheduler.next(l);
+    innerCb = () => {
+      scheduler.next(containerName);
       count += 1;
       if (count === testCaseFiles.length) {
         resolve(result);
@@ -146,7 +146,7 @@ const four = (lang, cfile, testCaseFiles, command, containerName) => {
       testCaseStream.unpipe();
       testCaseStream.destroy();
       if (err && err.signal !== 'SIGINT') {
-        innerCb(lang);
+        innerCb();
         result[testCaseFile] = {
           error: true,
           timeout: false,
@@ -155,7 +155,7 @@ const four = (lang, cfile, testCaseFiles, command, containerName) => {
         return null;
       }
       if (stderr) {
-        innerCb(lang);
+        innerCb();
         result[testCaseFile] = {
           error: true,
           timeout: false,
@@ -165,7 +165,7 @@ const four = (lang, cfile, testCaseFiles, command, containerName) => {
       }
       if ((err && err.killed && err.signal === 'SIGINT')
         || parseFloat(runTimeDuration / 1000) > parseFloat(timeLimit)) {
-        innerCb(lang);
+        innerCb();
         result[testCaseFile] = {
           error: true,
           timeout: true,
@@ -173,7 +173,7 @@ const four = (lang, cfile, testCaseFiles, command, containerName) => {
         };
         return null;
       }
-      innerCb(lang);
+      innerCb();
       result[testCaseFile] = { error: false, output: stdout.trim() };
       return null;
     };
@@ -188,7 +188,7 @@ const four = (lang, cfile, testCaseFiles, command, containerName) => {
     const testCaseFile = testCaseFiles[idx].file;
     const timeOutBar = parseFloat(testCaseFiles[idx].timeout) * 3000;
     const timeLimit = testCaseFiles[idx].timeout;
-    scheduler.schedule(asyncTask.bind(this, timeOutBar, testCaseFile, timeLimit), lang);
+    scheduler.schedule(asyncTask.bind(this, timeOutBar, testCaseFile, timeLimit), containerName);
   }
   return pinger();
 };
