@@ -24,22 +24,24 @@ const cpuDistribution = {
   cpp: 1,
   python2: 1,
   python3: 1,
+  java8: 1,
 };
 const containers = {
   c: 1,
   cpp: 1,
   python2: 1,
   python3: 1,
+  java8: 1,
 };
 
 module.exports = () => {
   fs.writeFileSync(
     path.join(__dirname, '../config/.cpudist.json'),
-    JSON.stringify(cpuDistribution),
+    `${JSON.stringify(cpuDistribution)}\n`,
   );
   fs.writeFileSync(
     path.join(__dirname, '../config/.containers.json'),
-    JSON.stringify(containers),
+    `${JSON.stringify(containers)}\n`,
   );
   process.stdout.write('Configuration reset successful\n');
 };

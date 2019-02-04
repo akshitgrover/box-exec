@@ -46,7 +46,7 @@ const setup = (args) => {
   }
   fs.writeFileSync(
     path.join(__dirname, '../config/.cpudist.json'),
-    JSON.stringify(config),
+    `${JSON.stringify(config)}\n`,
   );
   process.stdout.write('Successfully configured\n');
 };

@@ -44,7 +44,7 @@ const setup = (args) => {
   }
   fs.writeFileSync(
     path.join(__dirname, '../config/.containers.json'),
-    JSON.stringify(config),
+    `${JSON.stringify(config)}\n`,
   );
   process.stdout.write('Successfully configured\n');
 };

@@ -35,11 +35,11 @@ module.exports = () => {
   });
   fs.writeFileSync(
     path.join(__dirname, '../config/.cpudist.json'),
-    JSON.stringify(cpuDistribution),
+    `${JSON.stringify(cpuDistribution)}\n`,
   );
   fs.writeFileSync(
     path.join(__dirname, '../config/.containers.json'),
-    JSON.stringify(containers),
+    `${JSON.stringify(containers)}\n`,
   );
   process.stdout.write('Successfully configured\n');
 };
