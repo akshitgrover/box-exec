@@ -188,7 +188,12 @@ const four = (lang, cfile, testCaseFiles, command, containerName) => {
     const testCaseFile = testCaseFiles[idx].file;
     const timeOutBar = parseFloat(testCaseFiles[idx].timeout) * 3000;
     const timeLimit = testCaseFiles[idx].timeout;
-    scheduler.schedule(asyncTask.bind(this, timeOutBar, testCaseFile, timeLimit), containerName);
+    const status = scheduler.schedule(
+      asyncTask.bind(this, timeOutBar, testCaseFile, timeLimit), containerName,
+    );
+    if (!status) {
+      result[testCaseFile] = { error: true, output: 'Error occured while scheduling' };
+    }
   }
   return pinger();
 };
