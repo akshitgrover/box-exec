@@ -16,13 +16,29 @@ limitations under the License.
 
 */
 
+const fs = require('fs');
+const path = require('path');
+
 const Queue = require('../concurrencyHandler.js');
 
 const queueDirectory = new Map();
+const scheduleLockQueue = new Set();
 
 const schedule = (task, containerName) => {
-  const queue = queueDirectory.get(containerName);
-  queue.queuePush(task);
+  try {
+    const lock = fs.readFileSync(
+      path.join(__dirname, '../../config/.schedule.lock'), { encoding: 'utf8' },
+    ).trim();
+    if (lock === 'true') {
+      scheduleLockQueue.add({ task, containerName });
+      return true;
+    }
+    const queue = queueDirectory.get(containerName);
+    queue.queuePush(task);
+    return true;
+  } catch (err) {
+    return false;
+  }
 };
 
 const next = (containerName) => {
