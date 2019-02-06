@@ -23,12 +23,37 @@ const Queue = require('../concurrencyHandler.js');
 
 const queueDirectory = new Map();
 const scheduleLockQueue = new Set();
+let lockInterval = null;
+
+const destroyLockInterval = () => {
+  clearInterval(lockInterval);
+};
+
+const scheduleLockQueueTasks = () => {
+  scheduleLockQueue.forEach((obj) => {
+    const { task, containerName } = obj;
+    const queue = queueDirectory.get(containerName);
+    queue.queuePush(task);
+  });
+};
 
 const schedule = (task, containerName) => {
   try {
     const lock = fs.readFileSync(
       path.join(__dirname, '../../config/.schedule.lock'), { encoding: 'utf8' },
     ).trim();
+    if (lock === 'true' && lockInterval === null) {
+      lockInterval = setInterval(() => {
+        const lockStatus = fs.readFileSync(
+          path.join(__dirname, '../../config/.schedule.lock'),
+          { encoding: 'utf8' },
+        ).trim();
+        if (lockStatus === 'false') {
+          destroyLockInterval();
+          scheduleLockQueueTasks();
+        }
+      }, 1000);
+    }
     if (lock === 'true') {
       scheduleLockQueue.add({ task, containerName });
       return true;
