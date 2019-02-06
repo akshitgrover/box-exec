@@ -43,7 +43,7 @@ const startContainers = () => {
 };
 
 module.exports = () => {
-  cp.exec('docker container ls -aq', (err, stdout, stderr) => {
+  cp.exec('docker container ls -a --format "{{.Names}}"', (err, stdout, stderr) => {
     if (err || stderr) {
       process.stderr.write((err) ? `${err.message}\n` : `${stderr.message}\n`);
       process.exit(1);
@@ -54,21 +54,26 @@ module.exports = () => {
       return;
     }
     let count = 0;
-    const containerIDs = sout.split('\n');
+    const containerNames = sout.split('\n');
     const cb = () => {
       count += 1;
-      if (count === containerIDs.length) {
+      if (count === containerNames.length) {
         startContainers();
       }
     };
-    containerIDs.forEach((id) => {
-      cp.exec(`docker container rm ${id} --force`, (e, _, serr) => {
+    containerNames.forEach((name) => {
+      if (!name.startsWith('box-exec')) {
+        cb();
+        return null;
+      }
+      cp.exec(`docker container rm ${name} --force`, (e, _, serr) => {
         if (e || serr) {
           process.stderr((e) ? `${e.message}\n` : `${serr.message}\n`);
           process.exit(1);
         }
         cb();
       });
+      return null;
     });
   });
 };
