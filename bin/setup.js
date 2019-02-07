@@ -22,7 +22,7 @@ const imageObj = require('../src/dockerimageLib.js');
 const cpuDistribution = require('../config/.cpudist.json');
 const containers = require('../config/.containers.json');
 
-const startContainers = () => {
+const startContainers = (cb) => {
   Object.keys(cpuDistribution).forEach((l) => {
     const containerName = `box-exec-${l}`;
     const image = imageObj[l];
@@ -35,6 +35,9 @@ const startContainers = () => {
         const stderrSplit = stderr.split(' ');
         if (stderrSplit.indexOf('Conflict.') === -1 && stderr.length > 0) {
           throw new Error(stderr);
+        }
+        if (cb instanceof Function && i === num - 1) {
+          cb();
         }
         process.stdout.write(`${containerName}-${i} container is running with CPUS = ${cpus}\n`);
       });
@@ -77,3 +80,5 @@ module.exports = () => {
     });
   });
 };
+
+module.exports.startContainers = startContainers;
