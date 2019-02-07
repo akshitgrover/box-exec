@@ -19,6 +19,7 @@ limitations under the License.
 */
 
 const setup = require('./setup.js');
+const gracefulSetup = require('./gracefulsetup.js');
 const setContainers = require('./setupcontainers.js');
 const setCPUs = require('./setupcpus.js');
 const reset = require('./reset.js');
@@ -28,12 +29,16 @@ const args = process.argv.slice(2);
 
 switch (args[0].trim()) {
   case 'setup':
+    if (args[1] && (args[1].trim() === '--graceful' || args[1].trim() === '-g')) {
+      gracefulSetup();
+      break;
+    }
     setup();
     break;
   case 'set':
-    if (args[1].trim() === 'containers') {
+    if (args[1] && args[1].trim() === 'containers') {
       setContainers(args.slice(2));
-    } else if (args[1].trim() === 'cpus') {
+    } else if (args[1] && args[1].trim() === 'cpus') {
       setCPUs(args.slice(2));
     }
     break;
