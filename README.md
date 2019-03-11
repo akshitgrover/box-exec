@@ -4,7 +4,7 @@
 
 ## What Is Box-Execute?
 
-Box execute is an npm package to compile/run codes (c,cpp,pyhton) in a virtualized environment, Here virtualized environment used is a docker container. This packages is built to ease the task of running a code against test cases as done by websites used to practice algorithmic coding.
+Box execute is an npm package to compile/run codes (c,cpp,python) in a virtualized environment, Here virtualized environment used is a docker container. This packages is built to ease the task of running a code against test cases as done by websites used to practice algorithmic coding.
 
 ## Using Box-Execute
 
