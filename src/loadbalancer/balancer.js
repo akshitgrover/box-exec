@@ -50,12 +50,9 @@ const setup = () => {
   return null;
 };
 
-const getContainer = (lang, stage) => {
-  const toBeScheduledOn = (lastScheduledOn[lang] + 1) % availableSpots[lang];
-  if (stage === 4) {
-    lastScheduledOn[lang] += (lastScheduledOn[lang] + 1) % availableSpots[lang];
-  }
-  return `box-exec-${lang}-${toBeScheduledOn}`;
+const getContainer = (lang) => {
+  lastScheduledOn[lang] = (lastScheduledOn[lang] + 1) % availableSpots[lang];
+  return `box-exec-${lang}-${lastScheduledOn[lang]}`;
 };
 
 const status = () => setupFlag;
