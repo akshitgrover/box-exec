@@ -111,10 +111,7 @@ const three = async (lang, cfile, containerName) => {
 // Stage Four: Execute Source Code
 
 const four = (lang, cfile, testCaseFiles, command, containerName) => {
-  let codefile = cfile;
-  codefile = codefile.replace(/\\/g, '/');
-  codefile = codefile.split('/');
-  let filename = codefile[codefile.length - 1];
+  let filename = basename(cfile);
   if (lang === 'java8') {
     filename = 'main';
   } else if (lang === 'c' || lang === 'cpp') {
