@@ -19,7 +19,6 @@ limitations under the License.
 const child = require('child_process');
 const fs = require('fs');
 const { promisify } = require('util');
-const { basename } = require('path');
 
 const cpuDistribution = require('../config/.cpudist.json');
 const { getStageFourTimeout } = require('./utils.js');
@@ -101,7 +100,7 @@ const three = async (lang, containerName) => {
 // Stage Four: Execute Source Code
 
 const four = (lang, testCaseFiles, command, containerName) => {
-  let filename = langDb[lang].outputFile;
+  const filename = langDb[lang].outputFile;
   let count = 0;
   let innerCb;
   const result = {};
