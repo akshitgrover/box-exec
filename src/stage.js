@@ -19,9 +19,9 @@ limitations under the License.
 const child = require('child_process');
 const fs = require('fs');
 const { promisify } = require('util');
+const { basename } = require('path');
 
 const cpuDistribution = require('../config/.cpudist.json');
-const ConcurrencyHandler = require('./concurrencyHandler.js');
 const { getStageFourTimeout } = require('./utils.js');
 const { getContainer } = require('./loadbalancer/balancer.js');
 const scheduler = require('./loadbalancer/scheduler.js');
@@ -91,10 +91,7 @@ const two = async (lang, codeFile, containerName) => {
 // Stage Three: Compile Source Code File (only for c/c++)
 
 const three = async (lang, cfile, containerName) => {
-  let codefile = cfile;
-  codefile = codefile.replace(/\\/g, '/');
-  codefile = codefile.split('/');
-  const fileName = codefile[codefile.length - 1];
+  const fileName = basename(cfile);
   let rawName = null;
   if (lang === 'c' || lang === 'cpp') {
     rawName = `${fileName.slice(0, fileName.indexOf('.'))}.out`;
