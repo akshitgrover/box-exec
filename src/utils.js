@@ -17,10 +17,9 @@ limitations under the License.
 */
 
 module.exports = {
-  getStageFourTimeout(cp, timeOut, queue) {
+  getStageFourTimeout(cp, timeOut) {
     return setTimeout(() => {
       cp.kill('SIGINT');
-      queue.queueNext();
     }, timeOut);
   },
 };

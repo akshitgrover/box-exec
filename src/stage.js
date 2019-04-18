@@ -182,7 +182,7 @@ const four = (lang, cfile, testCaseFiles, command, containerName) => {
     `, cb);
     testCaseStream.pipe(childProcess.stdin);
     runTimeDuration = (new Date()).getTime();
-    timeOut = getStageFourTimeout(childProcess, timeOutBar, queue);
+    timeOut = getStageFourTimeout(childProcess, timeOutBar);
   };
   for (let idx = 0; idx < testCaseFiles.length; idx += 1) {
     const testCaseFile = testCaseFiles[idx].file;
