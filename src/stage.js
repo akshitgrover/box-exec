@@ -28,7 +28,6 @@ const scheduler = require('./loadbalancer/scheduler.js');
 const compileCommands = require('./compileCommands.js');
 
 const exec = promisify(child.exec);
-const queue = new ConcurrencyHandler();
 
 // Stage One : Check State Of Container
 
