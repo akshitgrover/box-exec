@@ -32,7 +32,6 @@ const handler = (emitter) => {
         })
         .then(() => stage.four(
           'python2',
-          e.codefile,
           e.testcasefiles,
           execCommands.python2,
           containerName,
@@ -56,7 +55,6 @@ const handler = (emitter) => {
         })
         .then(() => stage.four(
           'python3',
-          e.codefile,
           e.testcasefiles,
           execCommands.python3,
           containerName,
@@ -80,12 +78,10 @@ const handler = (emitter) => {
         })
         .then(() => stage.three(
           'c',
-          e.codefile,
           containerName,
         ))
         .then(() => stage.four(
           'c',
-          e.codefile,
           e.testcasefiles,
           execCommands.c,
           containerName,
@@ -107,10 +103,9 @@ const handler = (emitter) => {
           containerName = cntName;
           return stage.two('cpp', e.codefile, containerName);
         })
-        .then(() => stage.three('cpp', e.codefile, containerName))
+        .then(() => stage.three('cpp', containerName))
         .then(() => stage.four(
           'cpp',
-          e.codefile,
           e.testcasefiles,
           execCommands.cpp,
           containerName,
@@ -132,10 +127,9 @@ const handler = (emitter) => {
           containerName = cntName;
           return stage.two('java8', e.codefile, containerName);
         })
-        .then(() => stage.three('java8', e.codefile, containerName))
+        .then(() => stage.three('java8', containerName))
         .then(() => stage.four(
           'java8',
-          e.codefile,
           e.testcasefiles,
           execCommands.java8,
           containerName,

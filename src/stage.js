@@ -26,6 +26,7 @@ const { getStageFourTimeout } = require('./utils.js');
 const { getContainer } = require('./loadbalancer/balancer.js');
 const scheduler = require('./loadbalancer/scheduler.js');
 const compileCommands = require('./compileCommands.js');
+const langDb = require('./langdb.js');
 
 const exec = promisify(child.exec);
 
@@ -71,14 +72,8 @@ const one = async (image, lang) => {
 // Stage Two : Copy Source Code File In The Container
 
 const two = async (lang, codeFile, containerName) => {
-  let output;
-  if (lang === 'java8') {
-    output = '/main.java';
-  } else {
-    output = '/';
-  }
   try {
-    await exec(`docker cp ${codeFile} ${containerName}:${output}`);
+    await exec(`docker cp ${codeFile} ${containerName}:${langDb[lang].inputFile}`);
   } catch (err) {
     if (err.stderr) {
       throw new Error(err.stderr);
@@ -90,13 +85,8 @@ const two = async (lang, codeFile, containerName) => {
 
 // Stage Three: Compile Source Code File (only for c/c++)
 
-const three = async (lang, cfile, containerName) => {
-  const fileName = basename(cfile);
-  let rawName = null;
-  if (lang === 'c' || lang === 'cpp') {
-    rawName = `${fileName.slice(0, fileName.indexOf('.'))}.out`;
-  }
-  const compileCommand = compileCommands[lang](containerName, fileName, rawName);
+const three = async (lang, containerName) => {
+  const compileCommand = compileCommands[lang](containerName);
   try {
     await exec(compileCommand);
   } catch (err) {
@@ -110,13 +100,8 @@ const three = async (lang, cfile, containerName) => {
 
 // Stage Four: Execute Source Code
 
-const four = (lang, cfile, testCaseFiles, command, containerName) => {
-  let filename = basename(cfile);
-  if (lang === 'java8') {
-    filename = 'main';
-  } else if (lang === 'c' || lang === 'cpp') {
-    filename = `${filename.slice(0, filename.indexOf('.'))}.out`;
-  }
+const four = (lang, testCaseFiles, command, containerName) => {
+  let filename = langDb[lang].outputFile;
   let count = 0;
   let innerCb;
   const result = {};
