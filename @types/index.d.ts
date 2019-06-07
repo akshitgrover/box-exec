@@ -37,7 +37,7 @@ declare namespace getEmitter {
   /*
     Structure of [BoxExec Instance].output
   */
-  interface Output {
+  export interface Output {
     readonly error: boolean;
     readonly timeout: boolean;
     readonly output: string;
@@ -48,7 +48,7 @@ declare namespace getEmitter {
 
     Passed in [BoxExec Instance].setData();
   */
-  interface TestCase {
+  export interface TestCase {
     file: string;
     timeout: number;
   }
