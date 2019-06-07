@@ -43,6 +43,14 @@ declare class ExecEmitter extends Emitter{
   execute(): void;
 }
 
+/*
+  ExecEmitter constructor function
+*/
 declare function getEmitter(): ExecEmitter;
+
+/*
+  Proxy namespace for ES6 imports
+*/
+declare namespace getEmitter { }
 
 export = getEmitter;
