@@ -6,8 +6,8 @@ import * as Emitter from 'events';
   Structure of [BoxExec Instance].output
 */
 interface Output {
-  readonly error: bool;
-  readonly timeout: bool;
+  readonly error: boolean;
+  readonly timeout: boolean;
   readonly output: string;
 }
 
@@ -29,9 +29,9 @@ interface TestCase {
 declare class ExecEmitter extends Emitter{
 
   // Readonly instance variables
-  readonly error: bool;
+  readonly error: boolean;
   readonly errortext: Error | null;
-  readonly output: output | null;
+  readonly output: Output | null;
 
   // Configurable variables
   private language: string | null;
