@@ -155,7 +155,7 @@ const four = (lang, testCaseFiles, command, containerName) => {
       return null;
     };
     const childProcess = child.exec(`
-      docker container exec -i ${containerName} ${command}${filename}
+      docker container exec -i ${containerName} sh -c "${command}${filename}"
     `, cb);
     testCaseStream.pipe(childProcess.stdin);
     runTimeDuration = (new Date()).getTime();
