@@ -16,10 +16,19 @@ limitations under the License.
 
 */
 
-module.exports = {
-  getStageFourTimeout(cp, timeOut) {
-    return setTimeout(() => {
-      cp.kill('SIGINT');
-    }, timeOut);
-  },
+const child = require('child_process');
+
+const getStageFourTimeout = (cp, timeOut) => setTimeout(() => cp.kill('SIGINT'), timeOut);
+
+const killContainer = (containerName) => {
+  child.exec(`docker container rm ${containerName} --force`, (err, stdout, stderr) => {
+    if (err) {
+      console.error(`Error killing container after TIMEOUT | ${containerName}`);
+    }
+    if (stderr) {
+      console.error(stderr);
+    }
+  });
 };
+
+module.exports = { getStageFourTimeout, killContainer };
