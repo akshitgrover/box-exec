@@ -21,7 +21,7 @@ const fs = require('fs');
 const { promisify } = require('util');
 
 const cpuDistribution = require('../config/.cpudist.json');
-const { getStageFourTimeout } = require('./utils.js');
+const { getStageFourTimeout, killContainer } = require('./utils.js');
 const { getContainer } = require('./loadbalancer/balancer.js');
 const scheduler = require('./loadbalancer/scheduler.js');
 const compileCommands = require('./compileCommands.js');
@@ -143,6 +143,7 @@ const four = (lang, testCaseFiles, command, containerName) => {
       if ((err && err.killed && err.signal === 'SIGINT')
         || parseFloat(runTimeDuration / 1000) > parseFloat(timeLimit)) {
         innerCb();
+        killContainer(containerName);
         result[testCaseFile] = {
           error: true,
           timeout: true,
