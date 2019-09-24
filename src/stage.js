@@ -147,7 +147,7 @@ const four = (lang, testCaseFiles, command, containerName) => {
         result[testCaseFile] = {
           error: true,
           timeout: true,
-          output: `TLE ${runTimeDuration / 1000}s`,
+          output: `TLE ${(runTimeDuration / 1000 - timeLimit).toFixed(2)}s`,
         };
         return null;
       }

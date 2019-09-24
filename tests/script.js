@@ -7,12 +7,14 @@ const { it, after } = require('mocha');
 const index = require('./../src/index.js');
 
 after(() => {
-  child.exec('docker container rm $(docker container ls -aq) -f', (err, stdout, stderr) => {
-    const e = err || stderr;
-    if (e !== undefined || e !== null) {
-      console.error(e);
-    }
-  });
+  setTimeout(() => {
+    child.exec('docker container rm $(docker container ls -aq) -f', (err, stdout, stderr) => {
+      const e = err || stderr;
+      if (e !== undefined || e !== null) {
+        console.error(e);
+      }
+    });
+  }, 2500);
 });
 
 it('Should Compile/Execute C Code', (done) => {

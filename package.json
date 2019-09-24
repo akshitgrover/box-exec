@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha --timeout 11000 tests/script.js",
+    "test": "mocha --timeout 25000 tests/script.js",
     "api-build": "./node_modules/.bin/tsc --build api/tsconfig.json --force",
     "api-lift": "node api/build/server.js",
     "api-lint": "./node_modules/.bin/eslint ./api/**.ts",
