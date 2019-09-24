@@ -1,9 +1,19 @@
 const path = require('path');
+const child = require('child_process');
 
 const expect = require('expect');
-const { it } = require('mocha');
+const { it, after } = require('mocha');
 
 const index = require('./../src/index.js');
+
+after(() => {
+  child.exec('docker container rm $(docker container ls -aq) -f', (err, stdout, stderr) => {
+    const e = err || stderr;
+    if (e !== undefined || e !== null) {
+      console.error(e);
+    }
+  });
+});
 
 it('Should Compile/Execute C Code', (done) => {
   const boxExec = index();
@@ -81,4 +91,22 @@ it('Should Compile/Execute java8 code', (done) => {
     boxExec.execute();
   });
   boxExec.setData('25', path.join(`${__dirname}/test_code.java`), [{ file: path.join(`${__dirname}/case.txt`), timeout: 2 }, { file: path.join(`${__dirname}/case.txt`), timeout: 2 }]);
+});
+
+it('Should Report TLE', (done) => {
+  const boxExec = index();
+  boxExec.on('output', () => {
+    if (boxExec.output[path.join(`${__dirname}/case.txt`)].output.startsWith('TLE')) {
+      done();
+      return;
+    }
+    done(new Error('Process not killed'));
+  });
+  boxExec.on('error', () => {
+    done(boxExec.errortext);
+  });
+  boxExec.on('success', () => {
+    boxExec.execute();
+  });
+  boxExec.setData('11', `${__dirname}/test_inf_code.c`, [{ file: `${__dirname}/case.txt`, timeout: 2 }]);
 });
