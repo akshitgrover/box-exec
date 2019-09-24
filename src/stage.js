@@ -155,16 +155,15 @@ const four = (lang, testCaseFiles, command, containerName) => {
       result[testCaseFile] = { error: false, output: stdout.trim() };
       return null;
     };
-    const childProcess = child.exec(`
-      docker container exec -i ${containerName} sh -c "${command}${filename}"
-    `, cb);
+    const childProcess = child.exec(`docker container exec -i ${containerName} sh -c "${command}${filename}"`,
+      cb);
     testCaseStream.pipe(childProcess.stdin);
     runTimeDuration = (new Date()).getTime();
     timeOut = getStageFourTimeout(childProcess, timeOutBar);
   };
   for (let idx = 0; idx < testCaseFiles.length; idx += 1) {
     const testCaseFile = testCaseFiles[idx].file;
-    const timeOutBar = parseFloat(testCaseFiles[idx].timeout) * 3000;
+    const timeOutBar = parseFloat(testCaseFiles[idx].timeout) * 1000;
     const timeLimit = testCaseFiles[idx].timeout;
     const status = scheduler.schedule(
       asyncTask.bind(this, timeOutBar, testCaseFile, timeLimit), containerName,
