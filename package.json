@@ -44,7 +44,7 @@
     "eslint-plugin-react": "^7.12.4",
     "eslint-plugin-typescript": "^0.14.0",
     "expect": "^24.8.0",
-    "mocha": "^6.1.4",
+    "mocha": "^7.1.2",
     "prettier": "^1.16.4",
     "typescript": "^3.2.1",
     "typescript-eslint-parser": "^22.0.0"
