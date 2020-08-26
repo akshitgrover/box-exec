@@ -45,7 +45,7 @@
     "eslint-plugin-typescript": "^0.14.0",
     "expect": "^24.8.0",
     "mocha": "^6.1.4",
-    "prettier": "^1.16.4",
+    "prettier": "^2.1.1",
     "typescript": "^3.2.1",
     "typescript-eslint-parser": "^22.0.0"
   },
