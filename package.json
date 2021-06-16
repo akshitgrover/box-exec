@@ -46,7 +46,7 @@
     "expect": "^24.8.0",
     "mocha": "^6.1.4",
     "prettier": "^1.16.4",
-    "typescript": "^3.2.1",
+    "typescript": "^4.3.3",
     "typescript-eslint-parser": "^22.0.0"
   },
   "dependencies": {
