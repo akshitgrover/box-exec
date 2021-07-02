@@ -35,7 +35,7 @@
   "homepage": "https://github.com/akshitgrover/box-exec#readme",
   "devDependencies": {
     "@types/express": "^4.16.1",
-    "eslint": "^5.12.1",
+    "eslint": "^7.30.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^4.0.0",
     "eslint-config-typescript": "^1.1.0",
